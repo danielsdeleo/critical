@@ -30,33 +30,58 @@ module Critical
         
         define_method(report_name.keys.first.to_sym) do
           uncoerced_value = instance_eval(&method_body)
-          coerce(uncoerced_value, report_name.values.first)
+          proxify_reporting_result(coerce(uncoerced_value, report_name.values.first))
         end
       else
-        define_method(report_name.to_sym, &method_body)
+        define_method(report_name.to_sym) do
+          proxify_reporting_result(instance_eval(&method_body))
+        end
       end
     end
     
+    def self.monitored_attributes
+      @monitored_attributes ||= []
+    end
+    
     def self.monitors(attribute, opts={})
+      monitored_attributes << attribute
       attr_accessor attribute.to_sym
       define_default_attribute(attribute) unless default_attr_defined?
     end
     
-    attr_reader :handler_block
+    attr_reader :processing_block, :creator_line
     
     def initialize(arg=nil, &block)
       self.default_attribute= arg if arg && self.respond_to?(:default_attribute=)
-      @handler_block = block
+      @processing_block = block
+      @creator_line = caller.first.sub(/:in \`new\'$/, '')
+    end
+    
+    def metric_name
+      self.class.metric_name
+    end
+    
+    def metadata
+      unless @metadata
+        @metadata = {:metric_name => metric_name}
+        self.class.monitored_attributes.each { |attr_name| @metadata[attr_name] = send(attr_name) }
+      end
+      @metadata
+    end
+    
+    def report
+      @report ||= CollectionReport.new(self)
     end
     
     def result
-      @result ||= run_command_or_block
+      @result ||= run_collection_command_or_block
     end
     
     def collect
-      assert_collection_block_or_command_exists!
-      run_handler_block
       reset!
+      assert_collection_block_or_command_exists!
+      report.collected_at = Time.new
+      run_processing_block
     end
     
     private
@@ -75,23 +100,18 @@ module Critical
       @default_attr_defined || false
     end
     
-    def run_handler_block
+    def run_processing_block
       begin
         # 1.8: lambda {}.arity #=> -1 ; 1.9: lambda {}.arity #=> 0
-        instance_eval(&handler_block) if handler_block.arity <= 0
-        handler_block.call(self)      if handler_block.arity > 0
+        instance_eval(&processing_block) if processing_block.arity <= 0
+        processing_block.call(self)      if processing_block.arity > 0
       rescue Exception => e
-        # TODO: maybe let some exceptions through, for example Errno::EINTR (SIGINT)
-        
-        # TODO: replace the below with FailureReport stuff
-        #puts("Uncaught Exception #{e.class.name} when running metric handler")
-        #puts(e.message)
-        #puts(e.backtrace.map {|line| "  " + line})
+        report.processing_failed!(e)
       end
     end
     
     def reset!
-      @result = nil
+      @result, @report = nil, nil
     end
     
     def collection_command
@@ -110,14 +130,16 @@ module Critical
       !!collection_block
     end
     
-    def run_command_or_block
+    def run_collection_command_or_block
       assert_collection_block_or_command_exists!
+        
+      begin
+        return `#{command_with_substitutions}`.criticalize if collection_command?
       
-      return CommandOutput.new(`#{command_with_substitutions}`) if collection_command?
-      
-      if collection_block
-        result = instance_eval(&collection_block)
-        return result.kind_of?(String) ? CommandOutput.new(result) : result
+        instance_eval(&collection_block).criticalize if collection_block
+        
+      rescue Exception => e
+        report.collection_failed!(e)
       end
     end
     
@@ -135,6 +157,11 @@ module Critical
       else
         raise ArgumentError, "Can't coerce values to type `#{type}'"
       end
+    end
+    
+    def proxify_reporting_result(result_obj)
+      result_obj = result_obj.target if result_obj.respond_to?(:target)
+      Proxies::MetricReportProxy.new(result_obj, self)
     end
     
     def assert_collection_block_or_command_exists!

@@ -8,10 +8,11 @@ module Critical
   end
 end
 
-require 'critical/failure_report'
+require 'critical/core_ext'
+require 'critical/expectations'
+require 'critical/proxies'
+require 'critical/collection_report'
 require 'critical/monitor_group_dsl'
 require 'critical/metric_collector'
-require 'critical/command_output'
-require 'critical/output_fields'
 require 'critical/monitor_group'
 require 'critical/dsl'

@@ -2,29 +2,53 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe MetricCollector do
   before do
-    MetricCollector.reset!
+    @collector_class = Class.new(MetricCollector)
   end
   
   it "keeps a collect string" do
-    MetricCollector.collects "df -k"
-    MetricCollector.collection_command.should == "df -k"
+    @collector_class.collects "df -k"
+    @collector_class.collection_command.should == "df -k"
   end
   
   it "resets collection_command on reset!" do
-    MetricCollector.collects "df -k"
-    MetricCollector.reset!
-    MetricCollector.collection_command.should be_nil
+    @collector_class.collects "df -k"
+    @collector_class.reset!
+    @collector_class.collection_command.should be_nil
   end
   
   it "keeps a collect block" do
-    MetricCollector.collects { 'ohai_caller' }
-    MetricCollector.collection_block.call.should == 'ohai_caller'
+    @collector_class.collects { 'ohai_caller' }
+    @collector_class.collection_block.call.should == 'ohai_caller'
   end
   
   it "resets collection_block on reset!" do
-    MetricCollector.collects { puts 'foo' }
-    MetricCollector.reset!
-    MetricCollector.collection_block.should be_nil
+    @collector_class.collects { puts 'foo' }
+    @collector_class.reset!
+    @collector_class.collection_block.should be_nil
+  end
+  
+  it "has a name" do
+    @collector_class.metric_name = :foobar_metric
+    @collector_class.metric_name.should == :foobar_metric
+  end
+  
+  it "makes the metric name available to instances" do
+    @collector_class.metric_name = :barbaz_metric
+    @collector_instance = @collector_class.new
+    @collector_instance.metric_name.should == :barbaz_metric
+  end
+  
+  describe "on initialization" do
+    before do
+      @metric_class = Class.new(MetricCollector)
+      @metric = @metric_class.new; @line = caller(0).first
+    end
+    
+    it "grabs the line number of call to new()" do
+      @metric.creator_line.should == @line
+      pending("check that this works as expected when creating via the DSL")
+      #which is what this info is for in the first place
+    end
   end
   
   describe "executing the collection command" do
@@ -63,6 +87,12 @@ describe MetricCollector do
       @metric_class.collects("echo ':string_to_echo'")
       @metric.result.strip.should == 'echo _this_'
     end
+    
+    it "passes its report object on to the command output object" do
+      pending :todo
+      @metric_class.collects { "some_system_data" }
+      @metric.result.report.should equal @metric.report
+    end
   end
   
   describe "defining reporting methods" do
@@ -84,23 +114,42 @@ describe MetricCollector do
       end
       @metric_class.new.answer.should == 42
     end
+    
+    it "wraps the result of reporting methods in a proxy object" do
+      @metric_class.reports(:answer) do
+        /([\d]+)$/.match(result).captures.first
+      end
+      metric_instance = @metric_class.new
+      metric_instance.answer.proxied?.should be_true
+      metric_instance.answer.respond_to?(:is).should be_true #rspec's respond_to() is dumb
+    end
   end
   
   describe "defining attributes" do
     before do
       @metric_class = Class.new(MetricCollector)
+      @metric_class.metric_name = :df
       @metric_instance = @metric_class.new
+      @metric_class.monitors(:filesystem)
+    end
+    
+    it "keeps a list of monitored attributes" do
+      @metric_class.monitored_attributes.should == [:filesystem]
+      @metric_class.monitors(:cats)
+      @metric_class.monitored_attributes.should == [:filesystem, :cats]
     end
     
     it "defines attribute accessors for monitored attributes" do
-      @metric_class.monitors(:filesystem)
       @metric_instance.filesystem = '/var'
       @metric_instance.filesystem.should == '/var'
     end
     
     it "makes the first monitored attribute defined an optional argument to initialize" do
-      @metric_class.monitors(:filesystem)
       @metric_class.new("/tmp").filesystem.should == "/tmp"
+    end
+    
+    it "converts itself to a hash of metadata" do
+      @metric_class.new("/tmp").metadata.should == {:metric_name => :df, :filesystem => '/tmp'}
     end
     
   end
@@ -117,7 +166,7 @@ describe MetricCollector do
     
     it "takes a block to execute expectations and reporting on checks" do
       metric = @metric_class.new { 'here I come' }
-      metric.handler_block.call.should == 'here I come'
+      metric.processing_block.call.should == 'here I come'
     end
     
     it "passes itself into the handler block if a block with arity 1 is given" do
@@ -136,23 +185,67 @@ describe MetricCollector do
       metric.snitch.should == :yoshiesque
     end
     
-    it "resets the results after running the result handler" do
+    it "resets the results before running the result handler" do
       @metric_class.collects { :some_data }
       metric = @metric_class.new { result.should == 'foo' }
+      metric.instance_variable_set(:@result, 'FAIL')
       metric.collect
-      metric.instance_variable_get(:@result).should be_nil #better way?
     end
     
     it "rescues errors that occur during result checking or result handling" do
       @metric_class.collects { :some_data }
       
-      metric = @metric_class.new { raise Exception }
+      metric = @metric_class.new { raise Exception, "an example exception" }
       lambda {metric.collect}.should_not raise_error
     end
     
-    it "makes a failure report available during collection" do
-      pending "first, consider how this failure report obj gets bubbled up"
+    it "adds errors during processing to the collection report" do
+      @metric_class.collects { :some_data }
+      metric = @metric_class.new { raise Exception, "an example exception" }
+      metric.collect
+      
+      metric.report.failed_in.should == :processing
+      exception = metric.report.errors.first
+      exception[:name].should == "Exception"
+      exception[:message].should == "an example exception"
     end
+    
+    it "adds errors during collection to the collection report" do
+      @metric_class.collects { raise Exception, "your collection is fail"}
+      metric = @metric_class.new { result }
+      metric.collect
+      
+      metric.report.failed_in.should == :collection
+      exception = metric.report.errors.first
+      exception[:name].should == "Exception"
+      exception[:message].should == "your collection is fail"
+    end
+  end
+  
+  describe "reporting the results of collection" do
+    before do
+      @metric_class = Class.new(MetricCollector)
+      @metric_class.metric_name = :df
+      @metric_instance = @metric_class.new
+      @metric_class.monitors(:filesystem)
+      @metric_class.collects { :no_op_for_testing }
+    end
+    
+    it "uses a unique report object for each collection run" do
+      first_report = @metric_instance.report
+      @metric_instance.collect
+      @metric_instance.report.should_not equal(first_report)
+    end
+    
+    it "sets the timestamp on the collection object" do
+      report_during_collection = nil
+      now = Time.new
+      Time.stub(:new).and_return(now)
+      @metric_instance = @metric_class.new { report_during_collection = report }
+      @metric_instance.collect
+      report_during_collection.collected_at.should == now
+    end
+    
   end
   
 end

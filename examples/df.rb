@@ -1,15 +1,16 @@
+# Eventually use a chef-like from_file() method to negate the need for this
+# boilerplate:
 $: << File.dirname(__FILE__) + "/../lib/"
 require "critical"
-
-# Eventually use a chef-like from_file() method to negate the need for this
-# boilerplate
 include Critical::DSL
 
-df_metric = Metric(:df) do |df|
+Metric(:df) do |df|
 	# Parameters that are passed to the collection command
   # You can have several of these; the *first* one declared will
   # be the +default_attribute+ which can be set by passing an argument
   # to initialize
+  # Implemented: monitors(:a_variable)
+  # Not Implemented: validation, required
   df.monitors(:filesystem, :validate => /\/.*/, :required => true)
 	
 	# Use Chef's convention of String=>shell command, Block=>ruby code
@@ -24,12 +25,6 @@ df_metric = Metric(:df) do |df|
 	  # command results should be stored as a subclass of string with extra sugar on top
 	  # if collect is given a block, the result should be checked for Stringness and converted
 	  # when appropriate
-	  puts "reporting percentage..."
-	  puts "result: #{result}"
-	  puts "result-last_line: #{result.last_line}"
-	  puts "..."
-    puts "result fields: #{result.last_line.fields(parse)}"
-    puts "result field 4: #{result.last_line.fields(parse).field(4)}"
 		result.last_line.fields(parse).field(4)
 	end
 	
@@ -37,11 +32,6 @@ df_metric = Metric(:df) do |df|
 	  result.last_line.fields(parse).field(3)
 	end
 end
-
-require 'pp'
-puts "df instance methods"
-pp df_metric.instance_methods.sort
-##### so far, we have:
 
 unix_host_checks = Monitor(:unix_host) do
   ## planned featurez ##
@@ -52,10 +42,11 @@ unix_host_checks = Monitor(:unix_host) do
   # non block declaration form scheduling? 
   #check_every(30 => :minutes)
   
-  ## implemented featurez ##
-  
   df("/") do |root_partition|
+    # implemented:
+    root_partition.percentage
     root_partition.percentage.is      less_than(91)
+    # not implemented:
     root_partition.percentage.trend("root partition", opts={})
   end
 end
