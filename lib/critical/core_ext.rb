@@ -21,6 +21,7 @@ module Critical
           klass.class_eval(criticalize_method)
         end
       end
+      
       attr_accessor :report
 
       def initialize(superclass_obj, report=nil)

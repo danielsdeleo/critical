@@ -59,7 +59,7 @@ describe CriticalString do
   end
   
   it "logs an error if the regexp doesn't match when using fields" do
-    report = CollectionReport.new(nil)
+    report = OutputHandler::DeferredHandler.new(nil)
     co = CriticalString.new("something_unexpected", report)
     co.fields(/^[\d]+$/)
     err = co.report.errors.first

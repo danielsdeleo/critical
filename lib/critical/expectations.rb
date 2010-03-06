@@ -10,8 +10,8 @@ module Critical
         if matcher[:block].call(target) == true
           true
         else
-          explanation = "expected value to be #{matcher[:name]} #{matcher[:arg]}, but it was #{self}"
-          report.expectation_failed!("ExpectationFailed", explanation, caller)
+          explanation = "expected value to be #{matcher[:name]} #{matcher[:arg]}, but it was #{target}"
+          report.expectation_failed("ExpectationFailed", explanation, caller)
           false
         end
       end
@@ -30,10 +30,23 @@ module Critical
       def lte(arg)
         {:name => 'less than or equal to', :arg => arg, :block => lambda { |other| other <= arg }}
       end
+      alias :less_than_or_equal_to :lte
+      
+      def less_than(arg)
+        {:name => 'less than', :arg => arg, :block => lambda { |other| other < arg }}
+      end
+      alias :lt :less_than
     
       def gte(arg)
         {:name => 'greater than or equal to', :arg => arg, :block => lambda { |other| other >= arg }}
       end
+      alias :greater_than_or_equal_to :gte
+      
+      def greater_than(arg)
+        {:name => 'greater than', :arg => arg, :block => lambda { |other| other > arg }}
+      end
+      alias :gt :greater_than
+    
     end
     
   end

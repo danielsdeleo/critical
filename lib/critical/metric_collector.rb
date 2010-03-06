@@ -49,7 +49,7 @@ module Critical
       define_default_attribute(attribute) unless default_attr_defined?
     end
     
-    attr_reader :processing_block, :creator_line
+    attr_reader   :processing_block, :creator_line, :report
     
     def initialize(arg=nil, &block)
       self.default_attribute= arg if arg && self.respond_to?(:default_attribute=)
@@ -61,6 +61,10 @@ module Critical
       self.class.metric_name
     end
     
+    def to_s
+      metric_name.to_s + "[#{default_attribute}]"
+    end
+    
     def metadata
       unless @metadata
         @metadata = {:metric_name => metric_name}
@@ -69,16 +73,16 @@ module Critical
       @metadata
     end
     
-    def report
-      @report ||= CollectionReport.new(self)
-    end
-    
     def result
       @result ||= run_collection_command_or_block
     end
     
-    def collect
+    def collect(output_handler)
       reset!
+      
+      @report = output_handler
+      output_handler.metric = self
+      
       assert_collection_block_or_command_exists!
       report.collected_at = Time.new
       run_processing_block
@@ -106,7 +110,7 @@ module Critical
         instance_eval(&processing_block) if processing_block.arity <= 0
         processing_block.call(self)      if processing_block.arity > 0
       rescue Exception => e
-        report.processing_failed!(e)
+        report.processing_failed(e)
       end
     end
     
@@ -134,13 +138,16 @@ module Critical
       assert_collection_block_or_command_exists!
         
       begin
-        return `#{command_with_substitutions}`.criticalize if collection_command?
-      
-        instance_eval(&collection_block).criticalize if collection_block
-        
+        result = 
+          if collection_command?
+            `#{command_with_substitutions}`.criticalize 
+          else
+            instance_eval(&collection_block).criticalize
+          end
       rescue Exception => e
-        report.collection_failed!(e)
+        report.collection_failed(e)
       end
+      proxify_reporting_result(result)
     end
     
     def command_with_substitutions
@@ -154,6 +161,12 @@ module Critical
       case type
       when :number
         Float(value)
+      when :string
+        String(value)
+      when :integer
+        Integer(value)
+      when :array
+        Array(value)
       else
         raise ArgumentError, "Can't coerce values to type `#{type}'"
       end

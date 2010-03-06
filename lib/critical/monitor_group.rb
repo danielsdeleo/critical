@@ -1,5 +1,6 @@
 module Critical
   class MonitorGroup
+    include Expectations::Matchers
     include MonitorGroupDSL
     
     attr_reader :name, :metric_collection
@@ -15,7 +16,13 @@ module Critical
     end
     
     def collect_all
-      @metric_collection.each { |metric| metric.collect }
+      OutputHandler::GroupDispatcher.new(self) do |o|
+        @metric_collection.each { |metric| metric.collect(o.metric_report) }
+      end
+    end
+    
+    def to_s
+      "monitor_group[#{name.to_s}]"
     end
     
     private

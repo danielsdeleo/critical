@@ -32,6 +32,10 @@ describe MonitorGroup do
     monitor_group.instance_variable_get(:@snitch).should == :booyah_activated
   end
   
+  it "provides a description of itself as a string" do
+    @monitor_group.to_s.should == "monitor_group[rspec_examples]"
+  end
+  
   describe "with metrics in the collection" do
     
     before do
@@ -40,12 +44,22 @@ describe MonitorGroup do
     end
 
     it "collects all of the metrics in its metric_collection" do
+      pending "correct setup of output handler stuff..."
+      
       spy_variable = nil
       metric = @metric_collector.new {spy_variable = :collection_completed; puts "running" }
       @monitor_group.add_metric_to_collection(metric)
       
       @monitor_group.collect_all
       spy_variable.should == :collection_completed
+    end
+    
+    it "creates a group output dispatcher for each collection run" do
+      pending
+    end
+    
+    it "passes a metric output handler to each metric when collecting it" do
+      pending
     end
     
   end
