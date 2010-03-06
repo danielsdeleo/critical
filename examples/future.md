@@ -1,21 +1,20 @@
 # Plans, Thoughts, Half-Baked Ideas, Etc. #
 
 ## TODO.next ##
-Output Handlers/formatters
-a basic runner
+* a basic scheduler, steal code from John Mettraux's Rufus-Scheduler: github.com/jmettraux/rufus-scheduler
+* use the EM version of the above, so re-jigger code to be more EM friendly
+* validate monitors attributes (format, presence)
 
 ## TODO.after ##
-* live reload is possible?
+* is live reload possible?
 	implement == on metric collectors
 	implement some sort of merge/reload on monitor group using the above
-* a real scheduler. what about ruby cron clones (for examples or use/steal)
-* eventmachine? probably the way to go for network checking...
 
 ## TODO.sometime ##
 * retry logic on failed expectations (i.e. try again every 1m 5 times after a failure)
 * look @ nagios and collectd docco for typical check types, start a std lib
 of metric collectors
-* rest-client integration (see above)
+* rest-client inspired HTTP collector (probably use igrigorik's em-http-req though)
 * unencumbered integration for BDD-esque "integration" monitoring?
 * A no-op mode may be possible by "stubbing" #result...
 * state transitions: have a warning state (maybe?) if over threshold, becomes alert if lasts too long;
@@ -34,10 +33,10 @@ of metric collectors
 * command line app to run 1/more checks
 
 ## Server Arch ##
-The server needs to have 3 parts or be 3 separate servers:
+The server should have these 3 parts or be 3 separate servers:
 
 1. 	Alert Server: 
-   	manages sending notifications via twit, email, etc. Should have some sort of
+   	manages sending notifications via twit, basecamp, email, etc. Should have some sort of
    	DSL for managing what alerts get sent, etc. based on source, time of day,
 		whatever
 		erlectricity?

@@ -4,6 +4,10 @@ $: << File.dirname(__FILE__) + "/../lib/"
 require "critical"
 include Critical::DSL
 
+Critical::OutputHandler::GroupDispatcher.configure do |dispatcher|
+  dispatcher.handler :text
+end
+
 Metric(:df) do |df|
 	# Parameters that are passed to the collection command
   # You can have several of these; the *first* one declared will
@@ -14,22 +18,23 @@ Metric(:df) do |df|
   df.monitors(:filesystem, :validate => /\/.*/, :required => true)
 	
 	# Use Chef's convention of String=>shell command, Block=>ruby code
-	# use Rails' convention that :something is a variable
+	# use Rails' convention that :something is a variable in a string
 	df.collects "df -k :filesystem"
 	
 	# Regexp to parse df -k output, used below
-  parse = /^([\S]+)[\s]+([\d]+)[\s]+([\d]+)[\s]+([\d]+)[\s]+([\d]+)%[\s]+([\S]+)$/
+	# Can this be made less fugly in a general way?
+  df_k_format = /^([\S]+)[\s]+([\d]+)[\s]+([\d]+)[\s]+([\d]+)[\s]+([\d]+)%[\s]+([\S]+)$/
 
 	# multiple reporting options (methods) are allowed
-	df.reports(:percentage) do
+	df.reports(:percentage => :integer) do
 	  # command results should be stored as a subclass of string with extra sugar on top
 	  # if collect is given a block, the result should be checked for Stringness and converted
 	  # when appropriate
-		result.last_line.fields(parse).field(4)
+		result.last_line.fields(df_k_format).field(4)
 	end
 	
 	df.reports(:blocks_used) do
-	  result.last_line.fields(parse).field(3)
+	  result.last_line.fields(df_k_format).field(3)
 	end
 end
 
@@ -44,10 +49,9 @@ unix_host_checks = Monitor(:unix_host) do
   
   df("/") do |root_partition|
     # implemented:
-    root_partition.percentage
-    root_partition.percentage.is      less_than(91)
+    root_partition.percentage.is      less_than(85)
     # not implemented:
-    root_partition.percentage.trend("root partition", opts={})
+    ###root_partition.percentage.trend("root partition", opts={})
   end
 end
 
