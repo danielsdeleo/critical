@@ -58,6 +58,19 @@ describe Expectations::Expectable do
     err[:message].should == "expected value to be somewhat like unpossible, but it was totally-unpossible"
   end
   
+  it "uses the reported value name in the explanation message when available" do
+    @expector.to_s = "absurdly high"
+    def @expector.reported_value_name
+      :avg_15_min
+    end
+    def @expector.owner
+      "system_load"
+    end
+    @expector.is(:name=>"not", :arg=>"absurdly high", :block=>lambda {|arg| "untrue"})
+    err = @report.errors.first
+    err[:message].should == "expected system_load[:avg_15_min] to be not absurdly high, but it was absurdly high"
+  end
+  
   it "aliases #is as #should_be" do
     @expector.should respond_to(:should_be)
   end

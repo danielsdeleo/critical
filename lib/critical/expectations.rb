@@ -10,7 +10,7 @@ module Critical
         if matcher[:block].call(target) == true
           true
         else
-          explanation = "expected value to be #{matcher[:name]} #{matcher[:arg]}, but it was #{target}"
+          explanation = "expected #{value_name} to be #{matcher[:name]} #{matcher[:arg]}, but it was #{target}"
           report.expectation_failed("ExpectationFailed", explanation, caller)
           false
         end
@@ -19,6 +19,14 @@ module Critical
       
       def target
         self
+      end
+      
+      def value_name
+        if (respond_to?(:reported_value_name) && respond_to?(:owner) && reported_value_name)
+          owner.to_s + "[#{reported_value_name.inspect}]"
+        else
+          "value"
+        end
       end
     end
     

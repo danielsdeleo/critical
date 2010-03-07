@@ -146,6 +146,14 @@ describe MetricCollector do
       metric_instance.answer.proxied?.should be_true
       metric_instance.answer.respond_to?(:is).should be_true #rspec's respond_to() is dumb
     end
+    
+    it "sets the name of the reported value on the proxy" do
+      @metric_class.reports(:answer) do
+        /([\d]+)$/.match(result).captures.first
+      end
+      metric_instance = @metric_class.new
+      metric_instance.answer.reported_value_name.should == :answer
+    end
   end
   
   describe "defining attributes" do

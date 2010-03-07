@@ -11,6 +11,10 @@ module Critical
     class ExtensionToBaseClass < ExtendableRubyBaseClass
       extend CoreExt::Base::ClassMethods
     end
+    
+    class ExtendedObject < ExtendableRubyBaseClass
+      include CoreExt::Base
+    end
   end
 end
 
@@ -20,6 +24,15 @@ describe Object do
     o = Object.new
     o.criticalize.should equal o
   end
+  
+  describe "when extended by the core extensions" do
+    it "stores a report object" do
+      o = TestHarness::ExtendedObject.new(:superclass_object)
+      o.report = :foo
+      o.report.should == :foo
+    end
+  end
+  
 end
 
 describe CoreExt::Base::ClassMethods do
@@ -40,12 +53,6 @@ describe CriticalString do
     co = CriticalString.new("123 abc")
     co.fields(/^([\d]+) ([\w]+)$/)[0].should == '123'
     co.fields(/^([\d]+) ([\w]+)$/)[1].should == 'abc'
-  end
-  
-  it "stores a report object" do
-    co = CriticalString.new("123")
-    co.report = :foo
-    co.report.should == :foo
   end
   
   it "can be initialized with a report object" do

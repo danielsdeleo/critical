@@ -7,11 +7,12 @@ module Critical
     class MetricReportProxy < ProxyBase
       include Expectations::Expectable
       
+      attr_accessor :reported_value_name
       attr_reader :target, :owner
 
-      def initialize(target, owner)
+      def initialize(target, owner, reported_value_name=nil)
         target = target.target if target.respond_to?(:target) #don't make a proxy sandwich
-        @target, @owner = target, owner
+        @target, @owner, @reported_value_name = target, owner, reported_value_name
       end
       
       def proxied?

@@ -25,16 +25,20 @@ module Critical
     def self.reports(report_name, &method_body)
       if report_name.kind_of?(Hash)
         unless report_name.keys.size == 1
-          raise ArgumentError, "you can't define reports using a hash with more than 1 key"
+          reason = "you must provide only one key and one value when defining reports with a hash. "
+          reason << "you gave #{report_name.inspect}"
+          raise ArgumentError, reason
         end
+        desired_output_class = report_name.values.first
+        report_name = report_name.keys.first.to_sym
         
-        define_method(report_name.keys.first.to_sym) do
+        define_method(report_name) do
           uncoerced_value = instance_eval(&method_body)
-          proxify_reporting_result(coerce(uncoerced_value, report_name.values.first))
+          proxify_reporting_result(coerce(uncoerced_value, desired_output_class), report_name)
         end
       else
         define_method(report_name.to_sym) do
-          proxify_reporting_result(instance_eval(&method_body))
+          proxify_reporting_result(instance_eval(&method_body), report_name)
         end
       end
     end
@@ -147,7 +151,7 @@ module Critical
       rescue Exception => e
         report.collection_failed(e)
       end
-      proxify_reporting_result(result)
+      result
     end
     
     def command_with_substitutions
@@ -172,9 +176,9 @@ module Critical
       end
     end
     
-    def proxify_reporting_result(result_obj)
+    def proxify_reporting_result(result_obj, reported_value_name)
       result_obj = result_obj.target if result_obj.respond_to?(:target)
-      Proxies::MetricReportProxy.new(result_obj, self)
+      Proxies::MetricReportProxy.new(result_obj, self, reported_value_name)
     end
     
     def assert_collection_block_or_command_exists!

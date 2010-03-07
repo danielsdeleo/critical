@@ -3,6 +3,7 @@ module Critical
     module Object
       # Try to convert the object to a custom subclass,
       # for example convert a String into a CriticalString
+      # If there is no custom subclass, return self.
       def criticalize
         self
       end
