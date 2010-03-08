@@ -66,7 +66,11 @@ module Critical
     end
     
     def to_s
-      metric_name.to_s + "[#{default_attribute}]"
+      if respond_to?(:default_attribute)
+        metric_name.to_s + "[#{default_attribute}]"
+      else
+        metric_name.to_s
+      end
     end
     
     def metadata
@@ -163,7 +167,7 @@ module Critical
     
     def coerce(value, type)
       case type
-      when :number
+      when :number, :float
         Float(value)
       when :string
         String(value)

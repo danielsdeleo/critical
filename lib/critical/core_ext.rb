@@ -60,7 +60,15 @@ module Critical
       preserve_class {split("\n").last}
     end
     
+    def line(line_number)
+      preserve_class { split("\n")[line_number] }
+    end
+    
     def fields(regexp)
+      unless regexp.kind_of?(Regexp)
+        raise ArgumentError, "You must give a Regular Expression to parse fields (you gave `#{regexp}')"
+      end
+      
       match_data = regexp.match(self)
       if match_data.nil?
         report.annotate("Regexp Match Failure", "Could not parse fields from #{self.inspect} with regexp #{regexp.inspect}")

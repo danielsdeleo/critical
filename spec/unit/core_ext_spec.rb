@@ -49,10 +49,22 @@ describe CriticalString do
     co.last_line.should == "baz"
   end
   
+  it "gives an arbitrary line of a multi-line string counting from zero" do
+    co = CriticalString.new("foo\nbar\nbaz")
+    co.line(0).should == "foo"
+    co.line(1).should == "bar"
+    co.line(2).should == "baz"
+  end
+  
   it "processes itself according to a given regular expression" do
     co = CriticalString.new("123 abc")
     co.fields(/^([\d]+) ([\w]+)$/)[0].should == '123'
     co.fields(/^([\d]+) ([\w]+)$/)[1].should == 'abc'
+  end
+  
+  it "raises an arugment error if you pass a non-regex to fields()" do
+    co = CriticalString.new("123 abc")
+    lambda {co.fields(:not_a_regex_wtf)}.should raise_error(ArgumentError)
   end
   
   it "can be initialized with a report object" do
