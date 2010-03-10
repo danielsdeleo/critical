@@ -32,9 +32,13 @@ Metric(:freemem) do |freemem|
   end
 end
 
+# having to set this variable is also worthless boilerplate...
 memory_checks = Monitor(:memory) do
   
   freemem do |memory|
+    
+    # :TODO: store trends to an external host w/ an API like this
+    record memory.mb_free
     memory.mb_free.is gte(1512)
   end
   
