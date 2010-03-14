@@ -6,12 +6,12 @@ module TestHarness
   end
 end
 
-describe DSL do
+describe MetricDSL do
   
   describe "defining new metrics" do
     before do
       @value_in_closure = nil
-      @new_metric = DSL.Metric(:squishiness) do |squishiness|
+      @new_metric = MetricDSL.Metric(:squishiness) do |squishiness|
         @value_in_closure = squishiness
       end
     end
@@ -31,10 +31,9 @@ describe DSL do
     end
   end
   
-  describe "defining monitor groups" do
-    
+  describe "defining monitors" do
     it "creates a new monitor group" do
-      monitor_group = DSL.Monitor(:developer_laptop) do |laptop|
+      monitor_group = MetricDSL.Monitor(:developer_laptop) do |laptop|
       end
       
       monitor_group.should be_an_instance_of(MonitorGroup)
@@ -43,7 +42,7 @@ describe DSL do
     
     it "passes a given block to the monitor group's initializer" do
       name = nil
-      monitor_group = DSL.Monitor(:developer_laptop) do |laptop|
+      monitor_group = MetricDSL.Monitor(:developer_laptop) do |laptop|
         name = laptop.name
       end
       name.should == :developer_laptop

@@ -1,5 +1,5 @@
 module Critical
-  module DSL
+  module MetricDSL
     extend self
     # define a new metric collector
     def Metric(metric_name)
