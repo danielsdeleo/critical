@@ -1,14 +1,10 @@
 module Critical
   class NotImplementedError < StandardError
   end
-  
-  
-  def log(message)
-    puts message
-  end
 end
 
 require 'critical/core_ext'
+require 'critical/scheduler'
 require 'critical/output_handler'
 require 'critical/expectations'
 require 'critical/proxies'
