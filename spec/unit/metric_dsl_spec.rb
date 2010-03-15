@@ -1,8 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 module TestHarness
-  class MonitorGroupDSLImplementer
-    include MonitorGroupDSL
+  class MonitorDSLImplementer
+    include MonitorDSL
   end
 end
 
@@ -27,29 +27,7 @@ describe MetricDSL do
     end
 
     it "adds the new metric collector class to the monitor group dsl" do
-      TestHarness::MonitorGroupDSLImplementer.new.should respond_to(:squishiness)
-    end
-  end
-  
-  describe "defining monitors" do
-    it "creates a new monitor group" do
-      monitor_group = MetricDSL.Monitor(:developer_laptop) do |laptop|
-      end
-      
-      monitor_group.should be_an_instance_of(MonitorGroup)
-      monitor_group.name.should == :developer_laptop
-    end
-    
-    it "passes a given block to the monitor group's initializer" do
-      name = nil
-      monitor_group = MetricDSL.Monitor(:developer_laptop) do |laptop|
-        name = laptop.name
-      end
-      name.should == :developer_laptop
-    end
-    
-    it "collects the monitor group into some global collection I haven't conceived yet" do
-      pending :obviously
+      TestHarness::MonitorDSLImplementer.new.should respond_to(:squishiness)
     end
   end
   

@@ -42,19 +42,6 @@ module Critical
     end
     
     class GroupBaseHandler
-      # def self.use_metric_handler(metric_handler_class)
-      #   @metric_handler_class = metric_handler_class
-      # end
-      
-      # def self.metric_handler(*args)
-      #   raise NotImplementedError, "The #{name} class must define it's own metric handler generator"
-      #   #unless @metric_handler_class
-      #   #  raise "No output handler for metrics is associated with group output handler #{self.name}"
-      #   #end
-      #   #
-      #   #puts "creating a #{@metric_handler_class.name}"
-      #   #@metric_handler_class.new(*args)
-      # end
       
       def self.symbol_to_handler
         @@symbol_to_handler ||= {}

@@ -1,7 +1,7 @@
 module Critical
   module Proxies
     class ProxyBase
-      instance_methods.each { |m| undef_method m unless m.to_s =~ /^(__|respond_to)/ }
+      instance_methods.each { |m| undef_method m unless m.to_s =~ /^(__|respond_to|object_id)/ }
     end
     
     class MetricReportProxy < ProxyBase

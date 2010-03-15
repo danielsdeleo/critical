@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+# Are we in a source tree checkout?
+path_to_lib = File.dirname(__FILE__) + '/../lib/critical.rb'
+if File.file?(path_to_lib)
+  # if so, add the lib dir to the ruby path
+  $:.unshift << File.expand_path(File.dirname(path_to_lib))
+end
+
+require 'critical'
+Critical::Application::Main.new.run

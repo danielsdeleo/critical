@@ -1,4 +1,10 @@
 module Critical
+  
+  # Instead of rails-style monkey-patching everything, the CoreExt here are
+  # primarily based on subclassing. Only a #criticalize method is added to
+  # Object; this method attempts to convert an object to the customized
+  # subclass. This is less convenient, but Critical isn't using many core
+  # extensions, and they're only used in a few places in the DSL.
   module CoreExt
     module Object
       # Try to convert the object to a custom subclass,
