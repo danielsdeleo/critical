@@ -21,7 +21,7 @@ describe Expectations::Expectable do
   
   it "requires access to a report object but doesn't implement this API itself" do
     naked_class = Class.new
-    naked_class.send(:include, Expectations::Expectable)
+    naked_class.send(:include, Critical::Expectations::Expectable)
     expector = naked_class.new
     lambda {expector.report}.should raise_error(Critical::NotImplementedError)
   end

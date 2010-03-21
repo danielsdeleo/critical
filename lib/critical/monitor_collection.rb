@@ -3,7 +3,7 @@ require 'singleton'
 module Critical
   class MonitorCollection
     include Singleton
-    include MonitorDSL
+    include DSL::MonitorDSL
     
     attr_reader :monitors, :tasks
     def initialize

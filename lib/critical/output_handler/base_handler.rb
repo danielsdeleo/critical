@@ -50,7 +50,7 @@ module Critical
       private
       
       def self.inherited(subclass)
-        symbol_to_handler[class_name_to_snake_symbol(subclass)] = subclass unless subclass.name.empty?
+        symbol_to_handler[class_name_to_snake_symbol(subclass)] = subclass unless subclass.name.to_s.empty?
       end
       
       def self.class_name_to_snake_symbol(subclass)

@@ -45,7 +45,9 @@ describe MetricCollector do
     end
     
     it "grabs the line number of call to new()" do
-      @metric.creator_line.should == @line
+      # in Ruby 1.9, @line will have :in `block (3 levels) in <top (required)>'
+      # at the end, but @metric.creator line won't
+      @line.should match Regexp.new(@metric.creator_line)
       pending("check that this works as expected when creating via the DSL")
       #which is what this info is for in the first place
     end

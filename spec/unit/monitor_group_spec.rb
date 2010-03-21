@@ -6,7 +6,7 @@ describe MonitorGroup do
   end
   
   it "implements the monitor group DSL" do
-    MonitorGroup.should include(MonitorDSL)
+    MonitorGroup.should include(Critical::DSL::MonitorDSL)
   end
   
   it "has a name" do

@@ -1,6 +1,21 @@
 require 'singleton'
 
 module Critical
+  
+  # Yields the instance of Critical::Application::Configuration so you can
+  # configure it in a block, like
+  #   Critical.configure do |c|
+  #     c.metric_directory("/etc/critical/metrics")
+  #   end
+  def self.configure
+    yield Application::Configuration.instance
+  end
+  
+  # Returns the instance of Critical::Application::Configuration
+  def self.config
+    Application::Configuration.instance
+  end
+  
   module Application
     class Configuration
       include Singleton
@@ -9,56 +24,56 @@ module Critical
       
       help_banner "Critical: Not even 0.0.1 yet."
       help_footer "http://github.com/danielsdeleo/critical"
+      
       def self.configure!
-        self.instance.parse_argv
+        self.instance.parse_opts
       end
       
-      def self.method_missing(method_name, *args, &block)
-        if instance.respond_to?(method_name)
-          instance.send(method_name, *args, &block)
-        else
-          super
-        end
-      end
-      
-      
-      attr_reader :metric_files
+      attr_reader :source_files
       
       def initialize
         reset!
       end
       
       def reset!
-        @metric_files = []
+        @source_files = []
       end
       
       option "Print the version and exit", :short => :v
-      def version(*args)
+      def version
         stdout.puts help_banner
         exit 1
       end
       
-      option "Print a not-that-helpful message and exit", :short => :h
+      option "Print this message and exit", :short => :h
       def help
         stdout.puts help_message
         exit 1
       end
       
-      option "Load metric definitions from the given directory", :short => :m
-      def metric_directory(dir)
-        @metric_files += Dir[File.expand_path(dir) + "/**/*.rb"]
+      option "Load the given source file or directory", :short => :r, :arg => "[directory|file]"
+      def require(dir)
+        @source_files.concat Dir[File.expand_path(dir) + "/**/*.rb"]
+      end
+      
+      cli_attr_accessor :pidfile, "The file where the process id is stored", :short => :p
+      
+      option "Detach and run as a daemon", :short => :D
+      def daemonize
+        @daemonize = true
+      end
+      
+      def daemonize?
+        @daemonize || false
+      end
+      
+      option "A sting of ruby code to evaluate", :short => :e, :arg => :code
+      def eval(ruby_code)
+        @eval_line_no ||= 0
+        @eval_line_no += 1
+        Kernel.eval(ruby_code, TOPLEVEL_BINDING, "-e command line option", @eval_line_no)
       end
       
     end
   end
-  
-  
-  def configure
-    yield Application::Configuration.instance
-  end
-  
-  def configuration
-    Application::Configuration.instance
-  end
-  
 end

@@ -1,17 +1,17 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
 module TestHarness
   class MonitorDSLImplementer
-    include MonitorDSL
+    include DSL::MonitorDSL
   end
 end
 
-describe MetricDSL do
+describe DSL::MetricDSL do
   
   describe "defining new metrics" do
     before do
       @value_in_closure = nil
-      @new_metric = MetricDSL.Metric(:squishiness) do |squishiness|
+      @new_metric = Critical::DSL::MetricDSL.Metric(:squishiness) do |squishiness|
         @value_in_closure = squishiness
       end
     end

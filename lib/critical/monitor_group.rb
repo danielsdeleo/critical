@@ -1,7 +1,7 @@
 module Critical
   class MonitorGroup
     include Expectations::Matchers
-    include MonitorDSL
+    include DSL::MonitorDSL
     
     attr_reader :name, :metric_collection
     

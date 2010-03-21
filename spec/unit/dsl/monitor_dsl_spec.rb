@@ -1,8 +1,8 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
 module TestHarness
   class MonitorDSLImplementer
-    include MonitorDSL
+    include DSL::MonitorDSL
     
     def metric_collection
       @collection ||= []
@@ -22,11 +22,11 @@ module TestHarness
   end
 end
 
-describe MonitorDSL do
+describe DSL::MonitorDSL do
   before do
     @dsl_user = TestHarness::MonitorDSLImplementer.new
     @metric_collector = TestHarness::MetricCollectorExample
-    MonitorDSL.define_metric(:ping, @metric_collector)
+    Critical::DSL::MonitorDSL.define_metric(:ping, @metric_collector)
   end
   
   it "adds a DSL method for a new metric collector" do
@@ -52,15 +52,15 @@ describe MonitorDSL do
     end
     
     it "raises an error when attempting to create a namespace with an invalid char" do
-      lambda {@dsl_user.Monitor("foo/bar")}.should raise_error(MonitorDSL::InvalidNamespace)
+      lambda {@dsl_user.Monitor("foo/bar")}.should raise_error(Critical::DSL::MonitorDSL::InvalidNamespace)
     end
     
     it "raises an error when attempting to create a namespace with a non-string or symbol object" do
       subclasses_are_cool = Class.new(String).new("foobar")
       lambda {@dsl_user.Monitor(subclasses_are_cool){}}.should_not raise_error
-      lambda {@dsl_user.Monitor(Range.new(2,5))}.should raise_error(MonitorDSL::InvalidNamespace)
+      lambda {@dsl_user.Monitor(Range.new(2,5))}.should raise_error(Critical::DSL::MonitorDSL::InvalidNamespace)
       # Fixnum#to_sym is pretty much guaranteed to be really confusing, so it is also banned:
-      lambda {@dsl_user.Monitor(123)}.should raise_error(MonitorDSL::InvalidNamespace)
+      lambda {@dsl_user.Monitor(123)}.should raise_error(Critical::DSL::MonitorDSL::InvalidNamespace)
     end
     
     it "has nested namespacing with blocks" do
