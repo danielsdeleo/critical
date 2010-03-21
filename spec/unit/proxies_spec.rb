@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 describe Proxies::MetricReportProxy do
   before do
     @proxied_object = '123'
-    @owner = Class.new(Monitor).new
+    @owner = Class.new(Critical::Monitor).new
     @proxy = Proxies::MetricReportProxy.new(@proxied_object, @owner)
   end
   

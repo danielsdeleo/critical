@@ -17,15 +17,26 @@ module Critical
     end
     
     class TaskList
+      include Loggable
+      
       def self.quantum
         5
       end
       
       attr_reader :tasks, :queue
       
-      def initialize
+      def initialize(*schedule_tasks)
         @queue = Queue.new
         @tasks = Hash.new { |hsh, key| hsh[key] = [] }
+        schedule_tasks.flatten.each { |t| schedule(t) }
+      end
+      
+      def run
+        log.debug { "starting scheduler loop" }
+        loop do
+          run_tasks
+          sleep_until_next_run
+        end
       end
       
       def schedule(task)

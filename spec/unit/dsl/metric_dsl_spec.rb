@@ -18,7 +18,7 @@ describe DSL::MetricDSL do
     
     it "creates a new metric collector class" do
       @new_metric.should be_an_instance_of(Class)
-      @new_metric.should < Monitor
+      @new_metric.should < Critical::Monitor
       @new_metric.should == @value_in_closure
     end
     
@@ -28,6 +28,10 @@ describe DSL::MetricDSL do
 
     it "adds the new metric collector class to the monitor group dsl" do
       TestHarness::MonitorDSLImplementer.new.should respond_to(:squishiness)
+    end
+    
+    it "assigns the metric to a constant so it has a useful name" do
+      Critical::Metrics::Squishiness.should == @new_metric
     end
   end
   

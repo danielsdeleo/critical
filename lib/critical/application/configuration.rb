@@ -18,6 +18,8 @@ module Critical
   
   module Application
     class Configuration
+      include Loggable
+      extend  Loggable
       include Singleton
       extend CLIOptionParser::ClassMethods
       include CLIOptionParser::InstanceMethods
@@ -36,7 +38,9 @@ module Critical
       end
       
       def reset!
-        @source_files = []
+        @source_files   = []
+        @daemonize      = nil
+        @eval_line_no   = nil
       end
       
       option "Print the version and exit", :short => :v

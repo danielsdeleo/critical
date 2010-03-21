@@ -1,8 +1,10 @@
 module Critical
   module Application
     class Main
+      include Loggable
       
       def run
+        log.info {"Starting up"}
         configure
         load_sources
         daemonize! if daemonizing?
@@ -15,8 +17,8 @@ module Critical
       end
       
       def load_sources
-        config.source_files.each do |metric_source|
-          FileLoader.load_in_context(DSL::TopLevel, metric_source)
+        config.source_files.each do |source_file|
+          FileLoader.load_metrics_and_monitors_in(source_file)
         end
       end
       
@@ -33,15 +35,15 @@ module Critical
       end
       
       def start_scheduler
-        scheduler = Scheduler::TaskList.new
-        MonitorCollection.instance.tasks.each { |t| scheduler.schedule(t) }
-        loop do
-          scheduler.run_tasks
-          scheduler.sleep_until_next_run
-        end
+        @scheduler = Scheduler::TaskList.new(monitor_collection.tasks)
+        @scheduler.run
       end
       
       private
+      
+      def monitor_collection
+        MonitorCollection.instance
+      end
       
       def config
         Critical.config

@@ -5,6 +5,12 @@ module Critical
 
   module FileLoader
     extend self
+    extend Loggable
+    
+    def load_metrics_and_monitors_in(file_or_dir)
+      log.debug { "Loading source file #{file_or_dir}" }
+      load_in_context(Critical::DSL::TopLevel, file_or_dir)
+    end
     
     def load_in_context(context_obj, file)
       assert_file_exists!(file)

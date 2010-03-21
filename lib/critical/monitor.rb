@@ -1,4 +1,7 @@
 module Critical
+  module Metrics
+  end
+  
   class Monitor
     
     class << self

@@ -7,18 +7,18 @@ module Critical
 
   module DSL
     module MonitorDSL
-      class CollectorNameToClassMap < Hash
+      class MonitorNameToClassMap < Hash
         include Singleton
       end
     
       extend self
     
       def self.define_metric(method_name, collector_class)
-        collector_class_for[method_name.to_sym] = collector_class
+        monitor_class_for[method_name.to_sym] = collector_class
       
         class_eval(<<-METHOD, __FILE__, __LINE__ + 1)
           def #{method_name.to_s}(arg=nil, &block)
-            monitor = collector_class_for[:#{method_name}].new(arg, &block)
+            monitor = monitor_class_for[:#{method_name}].new(arg, &block)
             push monitor
             monitor
           end 
@@ -85,8 +85,8 @@ module Critical
         end
       end
     
-      def collector_class_for
-        CollectorNameToClassMap.instance
+      def monitor_class_for
+        MonitorNameToClassMap.instance
       end
     
     end

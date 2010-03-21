@@ -2,6 +2,7 @@ require 'singleton'
 
 module Critical
   class MonitorCollection
+    include Loggable
     include Singleton
     include DSL::MonitorDSL
     
@@ -15,9 +16,14 @@ module Critical
     end
     
     def push(monitor)
+      log.debug { "adding monitor #{current_namespace}/#{monitor.to_s}"}
       nested_group = namespace.inject(@monitors) { |nested, group| nested[group] ||= {} }
       (nested_group[:monitors] ||= []) << monitor
       @tasks << Scheduler::Task.new(interval || 600) {|output_handler| monitor.collect(output_handler)}
+    end
+    
+    def current_namespace
+      "/#{namespace.join('/')}"
     end
     
     def find(*namespace_elements)
@@ -32,7 +38,7 @@ module Critical
     end
     
     def split_namespaces(namespace_str)
-      namespace_str = namespace_str.dup
+      namespace_str = namespace_str.sub(/^\//,'')
       components = []
       while namespace_str.sub!(/^([^\/\(\)]+)\//) { |match| components << $1.to_sym; nil }
       end

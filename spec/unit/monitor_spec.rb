@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe Monitor do
   before do
-    @collector_class = Class.new(Monitor)
+    @collector_class = Class.new(Critical::Monitor)
   end
   
   it "keeps a collect string" do
@@ -40,7 +40,7 @@ describe Monitor do
   
   describe "on initialization" do
     before do
-      @metric_class = Class.new(Monitor)
+      @metric_class = Class.new(Critical::Monitor)
       @metric = @metric_class.new; @line = caller(0).first
     end
     
@@ -56,7 +56,7 @@ describe Monitor do
   
   describe "executing the collection command" do
     before do
-      @metric_class = Class.new(Monitor)
+      @metric_class = Class.new(Critical::Monitor)
       @metric = @metric_class.new
       @report = OutputHandler::DeferredHandler.new(nil)
     end
@@ -101,7 +101,7 @@ describe Monitor do
   
   describe "defining reporting methods" do
     before do
-      @metric_class = Class.new(Monitor)
+      @metric_class = Class.new(Critical::Monitor)
       @metric_class.collects { 'the answer is 42'}
     end
     
@@ -160,7 +160,7 @@ describe Monitor do
   
   describe "defining attributes" do
     before do
-      @metric_class = Class.new(Monitor)
+      @metric_class = Class.new(Critical::Monitor)
       @metric_class.metric_name = :df
       @metric_instance = @metric_class.new
       @metric_class.monitors(:filesystem)
@@ -193,7 +193,7 @@ describe Monitor do
   
   describe "collecting metrics" do
     before do
-      @metric_class = Class.new(Monitor)
+      @metric_class = Class.new(Critical::Monitor)
       @metric_class.send(:attr_accessor, :snitch)
       @output_handler = OutputHandler::DeferredHandler.new(nil)
     end
@@ -276,7 +276,7 @@ describe Monitor do
   
   describe "reporting the results of collection" do
     before do
-      @metric_class = Class.new(Monitor)
+      @metric_class = Class.new(Critical::Monitor)
       @metric_class.metric_name = :df
       @metric_instance = @metric_class.new
       @metric_class.monitors(:filesystem)

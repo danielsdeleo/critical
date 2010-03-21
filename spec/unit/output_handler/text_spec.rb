@@ -25,7 +25,7 @@ end
 
 describe OutputHandler::TextHandler do
   before do
-    metric_collector_class = Class.new(Monitor)
+    metric_collector_class = Class.new(Critical::Monitor)
     metric_collector_class.metric_name = :disk_io
     metric_collector_class.monitors(:filesystem)
     @metric_collector = metric_collector_class.new("root")

@@ -27,13 +27,24 @@ end
 
 describe Scheduler::TaskList do
   before do
-    @time = Time.at(1268452029) { :run_task_run }
+    @time = Time.at(1268452029)
     Time.stub!(:new).and_return(@time)
     @list = Scheduler::TaskList.new
   end
   
   it "has a setting for time quantum" do
     Scheduler::TaskList.quantum.should == 5
+  end
+  
+  it "takes a list of tasks in it's initializer" do
+    first_task   = Scheduler::Task.new(10) { :first }
+    second_task  = Scheduler::Task.new(10, @time.to_i + 10) { :second }
+    third_task   = Scheduler::Task.new(10, @time.to_i + 20) { :third }
+    list = Scheduler::TaskList.new(first_task, second_task, third_task)
+    
+    list.tasks.values.flatten.should include(first_task)
+    list.tasks.values.flatten.should include(second_task)
+    list.tasks.values.flatten.should include(third_task)
   end
   
   it "stores a task as quantized_time=>[task]" do

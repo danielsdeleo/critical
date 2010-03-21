@@ -39,7 +39,7 @@ describe MonitorGroup do
   describe "with metrics in the collection" do
     
     before do
-      @metric_collector = Class.new(Monitor)
+      @metric_collector = Class.new(Critical::Monitor)
       @metric_collector.collects { :foo }
     end
 
