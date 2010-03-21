@@ -1,14 +1,14 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
 module TestHarness
   class CLIOptUser
-    extend  CLIOptionParser::ClassMethods
-    include CLIOptionParser::InstanceMethods
+    extend  Application::CLIOptionParser::ClassMethods
+    include Application::CLIOptionParser::InstanceMethods
     
   end
 end
 
-describe CLIOptionParser do
+describe Application::CLIOptionParser do
   before do
     @cli_opt_user_class = Class.new(TestHarness::CLIOptUser)
   end
@@ -118,7 +118,7 @@ describe CLIOptionParser do
   it "raises an error when given an invalid option" do
     @cli_opt_user = @cli_opt_user_class.new
     @cli_opt_user.stub!(:argv).and_return(%w{--not-implemented})
-    lambda {@cli_opt_user.parse_argv}.should raise_error(CLIOptionParser::InvalidCliOption)
+    lambda {@cli_opt_user.parse_argv}.should raise_error(InvalidCliOption)
   end
   
   it "only sets CLI options on the first method added after calling option" do
@@ -173,7 +173,6 @@ describe CLIOptionParser do
       cli_attr_accessor :ivar_from_cli, "set the value of ivar_from_cli", :short => :i
     end
     @cli_opt_user = @cli_opt_user_class.new
-    pp @cli_opt_user_class.valid_options
     @cli_opt_user.stub!(:argv).and_return(%w{-i setfromcli})
     @cli_opt_user.parse_opts
     @cli_opt_user.ivar_from_cli.should == "setfromcli"

@@ -8,9 +8,9 @@ describe MonitorCollection do
   
   describe "adding metrics to the collection" do
     before do
-      @metric_class = Class.new(MetricCollector)
+      @metric_class = Class.new(Monitor)
       
-      @metric_class = Class.new(MetricCollector)
+      @metric_class = Class.new(Monitor)
       @metric_class.metric_name = :df
       @metric_class.monitors(:filesystem)
       @metric_class.collects { :no_op_for_testing }
@@ -48,6 +48,17 @@ describe MonitorCollection do
       @collection.monitors.should == expected
     end
     
+    it "either silently replaces or raises when adding the same monitor twice in a namespace" do
+      monitor = @monitor
+      @collection.Monitor(:unix_boxes) do
+        Monitor(:disks) do
+          push monitor
+          push monitor
+        end
+      end
+      pending
+    end
+    
     it "allows monitors to peacefully coexist with sub-namespaces" do
       monitor = @monitor
       @collection.Monitor(:unix_boxes) do
@@ -66,9 +77,17 @@ describe MonitorCollection do
           push monitor
         end
       end
-      pending
-      @collection.find_monitor(:unix_boxen, :disks, 'df[]').should equal(monitor)
-      @collection.find_monitor('unix_boxen/disks/df[]').should equal(monitor)
+      @collection.find(:unix_boxen, :disks, 'df()').should equal(monitor)
+      @collection.find('unix_boxen/disks/df()').should equal(monitor)
+    end
+    
+    it "gives nil if the monitor cannot be found" do
+      @collection.find('df()').should be_nil
+    end
+    
+    it "splits a namspace string into its elements" do
+      @collection.split_namespaces('unix_boxen/disks/df()').should == [:unix_boxen, :disks, 'df()']
+      @collection.split_namespaces('unix_boxen/disks/df(/)').should == [:unix_boxen, :disks, 'df(/)']
     end
   end
   

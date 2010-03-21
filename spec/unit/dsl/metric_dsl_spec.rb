@@ -18,7 +18,7 @@ describe DSL::MetricDSL do
     
     it "creates a new metric collector class" do
       @new_metric.should be_an_instance_of(Class)
-      @new_metric.should < MetricCollector
+      @new_metric.should < Monitor
       @new_metric.should == @value_in_closure
     end
     

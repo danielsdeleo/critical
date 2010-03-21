@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
 describe OutputHandler::DeferredHandler do
   before do
-    metric_collector_class = Class.new(MetricCollector)
+    metric_collector_class = Class.new(Monitor)
     metric_collector_class.metric_name = :disk_io
     metric_collector_class.monitors(:filesystem)
     @metric_collector = metric_collector_class.new

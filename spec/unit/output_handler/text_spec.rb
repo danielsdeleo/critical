@@ -25,7 +25,7 @@ end
 
 describe OutputHandler::TextHandler do
   before do
-    metric_collector_class = Class.new(MetricCollector)
+    metric_collector_class = Class.new(Monitor)
     metric_collector_class.metric_name = :disk_io
     metric_collector_class.monitors(:filesystem)
     @metric_collector = metric_collector_class.new("root")
@@ -44,7 +44,7 @@ describe OutputHandler::TextHandler do
   
   it "prints 'collecting metric.to_s' when collection_started is called" do
     @handler.collection_started
-    @output_io.string.should == "collecting disk_io[root]\n"
+    @output_io.string.should == "collecting disk_io(root)\n"
   end
   
   it "doesn't print anything when collection_succeeded is called" do
@@ -71,14 +71,14 @@ describe OutputHandler::TextHandler do
   
     it "prints the exception when collection fails" do
       @handler.collection_failed(@exception)
-      @output_io.string.should match(/^Collection of disk_io\[root\] FAILED/)
+      @output_io.string.should match(/^Collection of disk_io\(root\) FAILED/)
       @output_io.string.should match(/StandardError: epic failz/)
     end
   
     it "prints outstanding annotations when collection fails" do
       @handler.annotate("MaybeThisIsWhy", "your codez is broken")
       @handler.collection_failed(@exception)
-      @output_io.string.should match(/^Collection of disk_io\[root\] FAILED/)
+      @output_io.string.should match(/^Collection of disk_io\(root\) FAILED/)
       @output_io.string.should match(/^Received warning prior to failure:/)
       @output_io.string.should match(/^MaybeThisIsWhy: your codez is broken/)
       @output_io.string.should match(/StandardError: epic failz/)
@@ -86,14 +86,14 @@ describe OutputHandler::TextHandler do
     
     it "prints the exception when processing fails" do
       @handler.processing_failed(@exception)
-      @output_io.string.should match(/^Processing of disk_io\[root\] FAILED/)
+      @output_io.string.should match(/^Processing of disk_io\(root\) FAILED/)
       @output_io.string.should match(/StandardError: epic failz/)
     end
     
     it "prints outstanding annotations when processing fails" do
       @handler.annotate("MaybeThisIsWhy", "your codez is broken")
       @handler.processing_failed(@exception)
-      @output_io.string.should match(/^Processing of disk_io\[root\] FAILED/)
+      @output_io.string.should match(/^Processing of disk_io\(root\) FAILED/)
       @output_io.string.should match(/^Received warning prior to failure:/)
       @output_io.string.should match(/^MaybeThisIsWhy: your codez is broken/)
       @output_io.string.should match(/StandardError: epic failz/)
@@ -101,14 +101,14 @@ describe OutputHandler::TextHandler do
     
     it "prints the explanation when an expectation fails" do
       @handler.expectation_failed(@exception)
-      @output_io.string.should match(/^Expectation on disk_io\[root\] FAILED/)
+      @output_io.string.should match(/^Expectation on disk_io\(root\) FAILED/)
       @output_io.string.should match(/StandardError: epic failz/)
     end
     
     it "prints outstanding annotations when an expectation fails" do
       @handler.annotate("MaybeThisIsWhy", "your codez is broken")
       @handler.expectation_failed(@exception)
-      @output_io.string.should match(/^Expectation on disk_io\[root\] FAILED/)
+      @output_io.string.should match(/^Expectation on disk_io\(root\) FAILED/)
       @output_io.string.should match(/^Received warning prior to failure:/)
       @output_io.string.should match(/^MaybeThisIsWhy: your codez is broken/)
       @output_io.string.should match(/StandardError: epic failz/)
@@ -116,7 +116,7 @@ describe OutputHandler::TextHandler do
     
     it "prints a message when an expectation succeeds" do
       @handler.expectation_succeeded("ExpectationSucceeded", "expected true to be true and wow, it is!")
-      @output_io.string.split("\n").first.should == "Expectation on disk_io[root] succeeded"
+      @output_io.string.split("\n").first.should == "Expectation on disk_io(root) succeeded"
       @output_io.string.split("\n").last.should == "ExpectationSucceeded: expected true to be true and wow, it is!"
     end
     

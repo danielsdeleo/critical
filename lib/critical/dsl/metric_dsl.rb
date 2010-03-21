@@ -4,7 +4,7 @@ module Critical
       extend self
       # define a new metric collector
       def Metric(metric_name)
-        metric_collector = Class.new(MetricCollector)
+        metric_collector = Class.new(Monitor)
         metric_collector.metric_name = metric_name
         yield metric_collector if block_given?
         MonitorDSL.define_metric(metric_name, metric_collector)

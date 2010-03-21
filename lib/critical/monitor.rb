@@ -1,5 +1,5 @@
 module Critical
-  class MetricCollector
+  class Monitor
     
     class << self
       attr_accessor :metric_name
@@ -67,7 +67,7 @@ module Critical
     
     def to_s
       if respond_to?(:default_attribute)
-        metric_name.to_s + "[#{default_attribute}]"
+        metric_name.to_s + "(#{default_attribute})"
       else
         metric_name.to_s
       end

@@ -1,9 +1,10 @@
 # Plans, Thoughts, Half-Baked Ideas, Etc. #
 
 ## TODO.next ##
-* a basic scheduler, steal code from John Mettraux's Rufus-Scheduler: github.com/jmettraux/rufus-scheduler
-* use the EM version of the above, so re-jigger code to be more EM friendly
 * validate monitors attributes (format, presence)
+* should monitor names use parens instead of sq. brackets?
+  that would make them look more like they do in the source, i.e.,
+  df("/") in the source would be df("/") instead of df["/"] like it is now
 
 ## TODO.after ##
 * is live reload possible?

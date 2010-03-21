@@ -14,7 +14,7 @@ module TestHarness
     
   end
   
-  class MetricCollectorExample
+  class MonitorExample
     attr_reader :initialized_with
     def initialize(*args)
       @initialized_with = args
@@ -25,7 +25,7 @@ end
 describe DSL::MonitorDSL do
   before do
     @dsl_user = TestHarness::MonitorDSLImplementer.new
-    @metric_collector = TestHarness::MetricCollectorExample
+    @metric_collector = TestHarness::MonitorExample
     Critical::DSL::MonitorDSL.define_metric(:ping, @metric_collector)
   end
   
@@ -52,15 +52,15 @@ describe DSL::MonitorDSL do
     end
     
     it "raises an error when attempting to create a namespace with an invalid char" do
-      lambda {@dsl_user.Monitor("foo/bar")}.should raise_error(Critical::DSL::MonitorDSL::InvalidNamespace)
+      lambda {@dsl_user.Monitor("foo/bar")}.should raise_error(InvalidNamespace)
     end
     
     it "raises an error when attempting to create a namespace with a non-string or symbol object" do
-      subclasses_are_cool = Class.new(String).new("foobar")
-      lambda {@dsl_user.Monitor(subclasses_are_cool){}}.should_not raise_error
-      lambda {@dsl_user.Monitor(Range.new(2,5))}.should raise_error(Critical::DSL::MonitorDSL::InvalidNamespace)
+      subclassing_string_works = Class.new(String).new("foobar")
+      lambda {@dsl_user.Monitor(subclassing_string_works){}}.should_not raise_error
+      lambda {@dsl_user.Monitor(Range.new(2,5))}.should raise_error(InvalidNamespace)
       # Fixnum#to_sym is pretty much guaranteed to be really confusing, so it is also banned:
-      lambda {@dsl_user.Monitor(123)}.should raise_error(Critical::DSL::MonitorDSL::InvalidNamespace)
+      lambda {@dsl_user.Monitor(123)}.should raise_error(InvalidNamespace)
     end
     
     it "has nested namespacing with blocks" do
@@ -111,5 +111,4 @@ describe DSL::MonitorDSL do
     end
     
   end
-  
 end

@@ -7,7 +7,7 @@ module Critical
         load_sources
         daemonize! if daemonizing?
         start_monitor_runner
-        # start_scheduler
+        start_scheduler
       end
       
       def configure
@@ -16,7 +16,7 @@ module Critical
       
       def load_sources
         config.source_files.each do |metric_source|
-          FileLoader.load_in_context(MonitorCollection.instance, metric_source)
+          FileLoader.load_in_context(DSL::TopLevel, metric_source)
         end
       end
       
@@ -33,7 +33,12 @@ module Critical
       end
       
       def start_scheduler
-        
+        scheduler = Scheduler::TaskList.new
+        MonitorCollection.instance.tasks.each { |t| scheduler.schedule(t) }
+        loop do
+          scheduler.run_tasks
+          scheduler.sleep_until_next_run
+        end
       end
       
       private

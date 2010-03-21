@@ -1,11 +1,12 @@
 require 'singleton'
 
 module Critical
+  
+  class InvalidNamespace < StandardError
+  end
+
   module DSL
     module MonitorDSL
-      class InvalidNamespace < StandardError
-      end
-    
       class CollectorNameToClassMap < Hash
         include Singleton
       end

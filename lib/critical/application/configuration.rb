@@ -52,8 +52,8 @@ module Critical
       end
       
       option "Load the given source file or directory", :short => :r, :arg => "[directory|file]"
-      def require(dir)
-        @source_files.concat Dir[File.expand_path(dir) + "/**/*.rb"]
+      def require(file_or_dir)
+        @source_files << File.expand_path(file_or_dir)
       end
       
       cli_attr_accessor :pidfile, "The file where the process id is stored", :short => :p

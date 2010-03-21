@@ -31,19 +31,10 @@ describe Application::Configuration do
       @config.parse_opts
     end
     
-    it "adds all of the files in a specified directory to the list of  source files" do
+    it "adds a file or directory to the list of sourcse" do
       fixture_dir = File.dirname(__FILE__) + '/../../fixtures/some_source_files'
       @config.require(fixture_dir)
-      expected = %w{one.rb two.rb three.rb}.map {|f| File.expand_path(fixture_dir + '/' + f)}
-      @config.source_files.sort.should == expected.sort
-    end
-    
-    it "adds the files in a specified directory to the list of source files specified on the command line" do
-      fixture_dir = File.dirname(__FILE__) + '/../../fixtures/some_source_files'
-      @config.stub!(:argv).and_return(["-r", fixture_dir])
-      @config.parse_opts
-      expected = %w{one.rb two.rb three.rb}.map {|f| File.expand_path(fixture_dir + '/' + f)}
-      @config.source_files.sort.should == expected.sort
+      @config.source_files.should == [File.expand_path(fixture_dir)]
     end
     
     it "adds multiple directories of sources" do
@@ -51,8 +42,7 @@ describe Application::Configuration do
       other_fixtures = File.dirname(__FILE__) + '/../../fixtures/more_source_files'
       @config.stub!(:argv).and_return(["-r", fixture_dir, "-r", other_fixtures])
       @config.parse_opts
-      expected = %w{one.rb two.rb three.rb}.map {|f| File.expand_path(fixture_dir + '/' + f)}
-      expected += %w{four.rb five.rb six.rb}.map { |f| File.expand_path(other_fixtures + '/' + f) }
+      expected = [File.expand_path(fixture_dir), File.expand_path(other_fixtures)]
       @config.source_files.sort.should == expected.sort
     end
     
@@ -71,6 +61,8 @@ describe Application::Configuration do
       @config.parse_opts
       @config.daemonize?.should be_true
     end
+    
+    it "specifies the default monitor interval"
     
     it "allows an arbitrary string to be eval'd" do
       breadcrumb = rand(1023).to_s(16)

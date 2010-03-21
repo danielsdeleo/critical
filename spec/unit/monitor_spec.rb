@@ -1,8 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
-describe MetricCollector do
+describe Monitor do
   before do
-    @collector_class = Class.new(MetricCollector)
+    @collector_class = Class.new(Monitor)
   end
   
   it "keeps a collect string" do
@@ -40,7 +40,7 @@ describe MetricCollector do
   
   describe "on initialization" do
     before do
-      @metric_class = Class.new(MetricCollector)
+      @metric_class = Class.new(Monitor)
       @metric = @metric_class.new; @line = caller(0).first
     end
     
@@ -56,7 +56,7 @@ describe MetricCollector do
   
   describe "executing the collection command" do
     before do
-      @metric_class = Class.new(MetricCollector)
+      @metric_class = Class.new(Monitor)
       @metric = @metric_class.new
       @report = OutputHandler::DeferredHandler.new(nil)
     end
@@ -101,7 +101,7 @@ describe MetricCollector do
   
   describe "defining reporting methods" do
     before do
-      @metric_class = Class.new(MetricCollector)
+      @metric_class = Class.new(Monitor)
       @metric_class.collects { 'the answer is 42'}
     end
     
@@ -160,7 +160,7 @@ describe MetricCollector do
   
   describe "defining attributes" do
     before do
-      @metric_class = Class.new(MetricCollector)
+      @metric_class = Class.new(Monitor)
       @metric_class.metric_name = :df
       @metric_instance = @metric_class.new
       @metric_class.monitors(:filesystem)
@@ -185,15 +185,15 @@ describe MetricCollector do
       @metric_class.new("/tmp").metadata.should == {:metric_name => :df, :filesystem => '/tmp'}
     end
     
-    it "converts itself to a string of the form metric_name[default_attribute]" do
-      @metric_class.new("/tmp").to_s.should == "df[/tmp]"
+    it "converts itself to a string of the form metric_name(default_attribute)" do
+      @metric_class.new("/tmp").to_s.should == "df(/tmp)"
     end
     
   end
   
   describe "collecting metrics" do
     before do
-      @metric_class = Class.new(MetricCollector)
+      @metric_class = Class.new(Monitor)
       @metric_class.send(:attr_accessor, :snitch)
       @output_handler = OutputHandler::DeferredHandler.new(nil)
     end
@@ -276,7 +276,7 @@ describe MetricCollector do
   
   describe "reporting the results of collection" do
     before do
-      @metric_class = Class.new(MetricCollector)
+      @metric_class = Class.new(Monitor)
       @metric_class.metric_name = :df
       @metric_instance = @metric_class.new
       @metric_class.monitors(:filesystem)
