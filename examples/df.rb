@@ -49,7 +49,7 @@ Monitor(:unix_box) do
   # Specify collection intervals with +every+ or +collect_every+
   # The +every+ form takes a block, each monitor you define inside the block
   # will be scheduled to run at that interval.
-  every(5=>:minutes) do
+  every(15=>:seconds) do
     
     # Monitor statements can be nested, this nesting will be included in the
     # collected data for tracking/tagging purposes.
@@ -58,7 +58,7 @@ Monitor(:unix_box) do
       
       # Monitors are defined in terms of the metrics they use. In this case,
       # we use the df() metric defined above. This metric is 
-      # /unix_box/disks/df["/"] in the namespace.
+      # /unix_box/disks/df(/) in the namespace.
       #
       # If you hadn't passed a block variable to +Monitor+ above, you could
       # just write <tt>df("/")</tt> instead of <tt>disks.df("/")</tt>
