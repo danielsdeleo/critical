@@ -3,7 +3,7 @@ This software is barely even alpha. Using it in production right now is not real
 
 == Manifesto
 Critical is my take on network/infrastructure monitoring. Here are the big ideas:
-* Infrastructure as code: The monitoring system should be an internal DSL so it can natively interact with any part of your infrastructure you can find a library for. You should also be able to productively alter its guts if you want/need to. This is a monitoring system for Ops people who write code.
+* Infrastructure as code: The monitoring system should be an internal DSL so it can natively interact with any part of your infrastructure you can find a library for. You should also be able to productively alter its guts if you want/need to. This is a monitoring system for Ops people who write code and coders who do ops.
 * Declarative: The configuration should have a feel of "my system should be like +this+" and not, "do this thing, do that thing, then email me if the result isn't 5."
 * API driven: This is meaningless so far, since there's no server yet. When there is a server, it should be possible to hack together a script with rest-client or curl to update the configuration. No clickety-clickety unless you like doing things that way. Updating a config file should also be a viable option which should peacefully co-exist with the API.
 * Graphing for the modern era: Also meaningless since there's no data collection or storage yet. But that data storage will not be RRD. And there will be pretty graphs, not ugly ones.
