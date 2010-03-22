@@ -3,17 +3,19 @@ module Critical
     class Main
       include Loggable
       
+      attr_reader :scheduler_thread
+      
       def run
         configure
         log.debug {"Critical is starting up, current PID: #{Process.pid}"}
-        set_signal_traps
+        trap_signals
         load_sources
         daemonize! if daemonizing?
-        start_scheduler
         start_monitor_runner
+        start_scheduler
       end
       
-      def set_signal_traps
+      def trap_signals
         Kernel.trap("TERM") do
           raise 'TODO: sensible signal handling'
         end
@@ -44,16 +46,18 @@ module Critical
       end
       
       def start_scheduler
-        @scheduler = Scheduler::TaskList.new(monitor_collection.tasks)
-        Thread.new do
-          @scheduler.run
-        end
+        scheduler.run
       end
       
       def start_monitor_runner
-        MonitorRunner.new(@scheduler.queue).run
+        Thread.new do
+          MonitorRunner.new(scheduler.queue).run
+        end
       end
       
+      def scheduler
+        @scheduler ||= Scheduler::TaskList.new(monitor_collection.tasks)
+      end
       
       private
       

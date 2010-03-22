@@ -1,28 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
-# describe OutputHandler::TextGroupHandler do
-#   before do
-#     @output_io = StringIO.new
-#     @metric_group = MonitorGroup.new(:disk_checks)
-#     
-#     @handler = OutputHandler::TextGroupHandler.new(@metric_group, :output_io => @output_io)
-#   end
-#   
-#   it "takes an IO object to print output to in the constructor" do
-#     @handler.io.should equal @output_io
-#   end
-#   
-#   it "prints 'Beginning collection on monitor_group[_name_]' when start is called" do
-#     @handler.start
-#     @output_io.string.should == "Beginning collection on monitor_group[disk_checks]\n"
-#   end
-#   
-#   it "prints 'Completed collection on monitor_group[_name_] when stop is called" do
-#     @handler.stop
-#     @output_io.string.should == "Completed collection on monitor_group[disk_checks]\n"
-#   end
-# end
-# 
 describe OutputHandler::Text do
   before do
     metric_collector_class = Class.new(Critical::Monitor)

@@ -16,7 +16,6 @@ module Critical
       def to_hsh
         as_hash = {}
         as_hash[:metric]              = @collector.metadata
-        as_hash[:metric_source_line]  = @collector.creator_line if failed?
         as_hash[:errors]              = failed? ? @errors : []
         as_hash[:failed]              = @failure
         as_hash[:collected_at]        = self.collected_at
@@ -51,12 +50,5 @@ module Critical
       end
 
     end
-    
-    # class DeferredGroupHandler < GroupBaseHandler
-    #   
-    #   def metric_report
-    #     DeferredHandler.new(:epic_fail_fixme)
-    #   end
-    # end
   end
 end

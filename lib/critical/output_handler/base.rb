@@ -6,7 +6,7 @@ module Critical
         @@symbol_to_handler ||= {}
       end
       
-      private
+      protected
       
       def self.inherited(subclass)
         symbol_to_handler[class_name_to_snake_symbol(subclass)] = subclass unless subclass.name.to_s.empty?

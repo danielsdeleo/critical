@@ -76,7 +76,6 @@ describe OutputHandler::Deferred do
     report_as_hash[:errors].last.should == {:name => @error.class.name, :message => @error.message, :stacktrace => @bt}
     report_as_hash[:failed].should == true
     report_as_hash[:metric].should == @metric_collector.metadata
-    report_as_hash[:metric_source_line].should == @metric_collector.creator_line
     report_as_hash[:collected_at].should == now
   end
   

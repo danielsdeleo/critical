@@ -16,6 +16,11 @@ describe Loggable do
     @logist.log.reset!
   end
   
+  it "sets the log level with a symbol" do
+    @logist.log.level = :info
+    @logist.log.level.should == ::Logger::INFO
+  end
+  
   it "logs using the pretty printer" do
     @logist.log.debug :foo => :bar
     @io.string.should match Regexp.escape(':message=>{:foo=>:bar}')

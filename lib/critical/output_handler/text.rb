@@ -58,27 +58,5 @@ module Critical
       end
       
     end
-    
-    # class TextGroupHandler < GroupBaseHandler
-    #   #use_metric_handler(TextHandler)
-    #   
-    #   attr_reader :io
-    #   
-    #   def setup(opts={})
-    #     @io = opts[:output_io] || STDOUT
-    #   end
-    #   
-    #   def start
-    #     io.puts "Beginning collection on " + metric_group.to_s
-    #   end
-    #   
-    #   def stop
-    #     io.puts "Completed collection on " + metric_group.to_s
-    #   end
-    #   
-    #   def metric_report
-    #     TextHandler.new(io)
-    #   end
-    # end
   end
 end

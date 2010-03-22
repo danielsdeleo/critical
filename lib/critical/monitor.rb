@@ -57,12 +57,11 @@ module Critical
     end
     
     attr_accessor :fqn
-    attr_reader   :processing_block, :creator_line, :report
+    attr_reader   :processing_block, :report
     
     def initialize(arg=nil, &block)
       self.default_attribute= arg if arg && self.respond_to?(:default_attribute=)
       @processing_block = block
-      @creator_line = caller.first.sub(/:in \`new\'$/, '')
     end
     
     def metric_name

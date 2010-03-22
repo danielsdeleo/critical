@@ -10,6 +10,8 @@ describe Application::Configuration do
   it "returns itself via a convenience method on the Critical module" do
     ::Critical.config.should equal ::Critical::Application::Configuration.instance
   end
+    
+  it "loads a configuration file"
   
   describe "reading command line options" do
     before do

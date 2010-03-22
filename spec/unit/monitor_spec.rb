@@ -38,22 +38,6 @@ describe Monitor do
     @collector_instance.metric_name.should == :barbaz_metric
   end
   
-  describe "on initialization" do
-    before do
-      @metric_class = Class.new(Critical::Monitor)
-      @metric = @metric_class.new; @line = caller(0).first
-    end
-    
-    it "grabs the line number of call to new()" do
-      # in Ruby 1.9, @line will have :in `block (3 levels) in <top (required)>'
-      # at the end, but @metric.creator line won't
-      @line.should match Regexp.new(@metric.creator_line)
-      pending("check that this works as expected when creating via the DSL")
-      #which is what this info is for in the first place
-    end
-    
-  end
-  
   describe "executing the collection command" do
     before do
       @metric_class = Class.new(Critical::Monitor)

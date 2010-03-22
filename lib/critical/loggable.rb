@@ -63,12 +63,8 @@ module Critical
           hashified_msg[:time]      = time.rfc2822      if active_fields.include?(:time)
           hashified_msg[:severity]  = severity          if active_fields.include?(:severity)
           hashified_msg[:sender]    = progname          if active_fields.include?(:sender)
-          hashified_msg[:message]   = eval_message(msg) if active_fields.include?(:message)
+          hashified_msg[:message]   = msg               if active_fields.include?(:message)
           hashified_msg
-        end
-        
-        def eval_message(message)
-          message.respond_to?(:call) ? message.call : message
         end
       end
       
@@ -99,26 +95,34 @@ module Critical
         level
       end
       
+      def level=(new_level)
+        @logger.level = level_to_const(new_level)
+      end
+      
+      def level
+        @logger.level
+      end
+      
       def fatal(msg=nil, &block)
-        @logger.fatal(progname, &format_args(msg, &block))
+        @logger.add(::Logger::FATAL, msg, progname, &block)
       end
       
       def error(msg=nil, &block)
-        @logger.error(progname, &format_args(msg, &block))
+        @logger.add(::Logger::ERROR, msg, progname, &block)
       end
       
       def warn(msg=nil, &block)
-        @logger.warn(progname, &format_args(msg, &block))
+        @logger.add(::Logger::WARN, msg, progname, &block)
       end
       
       alias :warning :warn
       
       def info(msg=nil, &block)
-        @logger.info(progname, &format_args(msg, &block))
+        @logger.add(::Logger::INFO, msg, progname, &block)
       end
       
       def debug(msg=nil, &block)
-        @logger.debug(progname, &format_args(msg, &block))
+        @logger.add(::Logger::DEBUG, msg, progname, &block)
       end
       
       private
@@ -127,13 +131,9 @@ module Critical
         "Critical[#{Process.pid}]"
       end
 
-      def format_args(msg, &block)
-        msg ? lambda {msg} : block
-      end
-
     end
     
-    # return the logger
+    # Returns the Logger instance.
     def log
       Logger.instance
     end
