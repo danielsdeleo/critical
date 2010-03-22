@@ -95,7 +95,6 @@ describe OutputHandler::Dispatcher do
   
   describe "when proxying messages to other output handlers" do
     before do
-      @metric_group = MonitorGroup.new(:disk_checks)
       @handler_class = Class.new(OutputHandler::Dispatcher)
       @handler_class.handler :deferred, :some_option => :a_setting
       @handler_class.handler :text, :output => STDOUT

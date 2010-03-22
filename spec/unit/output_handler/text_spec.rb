@@ -32,7 +32,7 @@ describe OutputHandler::Text do
     
     
     @output_io = StringIO.new
-    @handler = OutputHandler::Text.new(@output_io)
+    @handler = OutputHandler::Text.new(:output => @output_io)
     @handler.metric = @metric_collector
   end
   
