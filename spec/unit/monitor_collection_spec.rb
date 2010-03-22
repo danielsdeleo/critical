@@ -20,6 +20,14 @@ describe MonitorCollection do
       @collection.push @monitor
       @collection.tasks.should have(1).task
     end
+    
+    it "sets a monitor's fully qualified name" do
+      monitor = @monitor
+      @collection.Monitor(:disks) do
+        push monitor
+      end
+      monitor.fqn.should == "/disks/df()"
+    end
 
     it "maps monitors into a nested hash" do
       monitor = @monitor
@@ -46,7 +54,7 @@ describe MonitorCollection do
       @collection.monitors.should == expected
     end
     
-    it "either silently replaces or raises when adding the same monitor twice in a namespace" do
+    it "either replaces, reopens, or raises when adding the same monitor twice in a namespace" do
       monitor = @monitor
       @collection.Monitor(:unix_boxes) do
         Monitor(:disks) do

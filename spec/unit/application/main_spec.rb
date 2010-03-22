@@ -8,6 +8,7 @@ describe Application::Main do
   it "loads metrics from files"
   it "loads monitor definitions from files"
   it "loads a configuration file"
+  it "sets traps for sigterm and sigint"
   
   it "daemonizes the application" do
     Application::Daemon.should_receive(:daemonize)

@@ -4,7 +4,7 @@ describe Scheduler::Task do
   before do
     @time = Time.new
     Time.stub!(:new).and_return(@time)
-    @task = Scheduler::Task.new(10) { :run_task_run }
+    @task = Scheduler::Task.new("/cpu/load_avg(15)", 10)
   end
   
   it "uses now as the default scheduled time" do
@@ -20,8 +20,8 @@ describe Scheduler::Task do
     @task.next_run.should == @time.to_i + 10
   end
   
-  it "has a code block to execute" do
-    @task.block.call.should == :run_task_run
+  it "keeps the qualified name of a monitor to execute" do
+    @task.monitor.should == "/cpu/load_avg(15)"
   end
 end
 
@@ -37,9 +37,9 @@ describe Scheduler::TaskList do
   end
   
   it "takes a list of tasks in it's initializer" do
-    first_task   = Scheduler::Task.new(10) { :first }
-    second_task  = Scheduler::Task.new(10, @time.to_i + 10) { :second }
-    third_task   = Scheduler::Task.new(10, @time.to_i + 20) { :third }
+    first_task   = Scheduler::Task.new('/cpu/load_avg(15)', 10)
+    second_task  = Scheduler::Task.new("/disks/df(/)",10, @time.to_i + 10)
+    third_task   = Scheduler::Task.new("/web/get(http://localhost/)",10, @time.to_i + 20)
     list = Scheduler::TaskList.new(first_task, second_task, third_task)
     
     list.tasks.values.flatten.should include(first_task)
@@ -48,27 +48,27 @@ describe Scheduler::TaskList do
   end
   
   it "stores a task as quantized_time=>[task]" do
-    task = Scheduler::Task.new(10)
+    task = Scheduler::Task.new('/host/uptime', 10)
     @list.schedule(task)
     @list.tasks.should == {1268452025 => [task]}
   end
   
-  it "it runs a task by placing its block on the queue and rescheduling the task" do
-    task = Scheduler::Task.new(75) { :run_task_run}
+  it "it runs a task by placing its monitor name on the queue and rescheduling the task" do
+    task = Scheduler::Task.new('/cpu/load_avg(5)', 75)
     task.next_run.should == 1268452029
     @list.send :run_task, task
-    @list.queue.pop.call.should == :run_task_run
+    @list.queue.pop.should == "/cpu/load_avg(5)"
     @list.tasks.should == {1268452100 => [task]}
     task.next_run.should == 1268452104
   end
   
   describe "when tasks have been scheduled" do
     before do
-      @first_task   = Scheduler::Task.new(10) { :first }
+      @first_task   = Scheduler::Task.new('/cpu/load_avg(15)', 10)
+      @second_task  = Scheduler::Task.new("/disks/df(/)",10, @time.to_i + 10)
+      @third_task   = Scheduler::Task.new("/web/get(http://localhost/)",10, @time.to_i + 20)
       @list.schedule(@first_task)
-      @second_task  = Scheduler::Task.new(10, @time.to_i + 10) { :second }
       @list.schedule(@second_task)
-      @third_task   = Scheduler::Task.new(10, @time.to_i + 20) { :third }
       @list.schedule(@third_task)
     end
     
@@ -94,8 +94,8 @@ describe Scheduler::TaskList do
       @list.run_tasks
       
       @list.next_run.should == 1268452035
-      @list.queue.pop.call.should == :first
-      @list.queue.pop.call.should == :second
+      @list.queue.pop.should == '/cpu/load_avg(15)'
+      @list.queue.pop.should == '/disks/df(/)'
     end
   end
   

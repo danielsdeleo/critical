@@ -1,12 +1,12 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
-describe OutputHandler::DeferredHandler do
+describe OutputHandler::Deferred do
   before do
     metric_collector_class = Class.new(Critical::Monitor)
     metric_collector_class.metric_name = :disk_io
     metric_collector_class.monitors(:filesystem)
     @metric_collector = metric_collector_class.new
-    @handler = OutputHandler::DeferredHandler.new(@metric_collector)
+    @handler = OutputHandler::Deferred.new(@metric_collector)
     
     @error = StandardError.new("A sample error message")
     @bt = caller(0)

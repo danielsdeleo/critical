@@ -5,6 +5,7 @@ module Critical
     include Loggable
     include Singleton
     include DSL::MonitorDSL
+    include Expectations::Matchers
     
     attr_reader :monitors, :tasks
     def initialize
@@ -16,10 +17,11 @@ module Critical
     end
     
     def push(monitor)
-      log.debug { "adding monitor #{current_namespace}/#{monitor.to_s}"}
+      monitor.fqn = "#{current_namespace}/#{monitor.to_s}"
+      log.debug { "adding monitor #{monitor.fqn}"}
       nested_group = namespace.inject(@monitors) { |nested, group| nested[group] ||= {} }
       (nested_group[:monitors] ||= []) << monitor
-      @tasks << Scheduler::Task.new(interval || 600) {|output_handler| monitor.collect(output_handler)}
+      @tasks << Scheduler::Task.new(monitor.fqn, (interval || 600)) {|output_handler| monitor.collect(output_handler)}
     end
     
     def current_namespace

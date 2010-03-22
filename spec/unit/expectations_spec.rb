@@ -16,7 +16,7 @@ end
 describe Expectations::Expectable do
   before do
     @expector = TestHarness::Expector.new
-    @report = @expector.report = OutputHandler::DeferredHandler.new(nil)
+    @report = @expector.report = OutputHandler::Deferred.new(nil)
   end
   
   it "requires access to a report object but doesn't implement this API itself" do

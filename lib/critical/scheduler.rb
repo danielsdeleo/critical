@@ -3,10 +3,10 @@ require 'thread'
 module Critical
   class Scheduler
     class Task
-      attr_reader :next_run, :interval, :block
+      attr_reader :next_run, :interval, :block, :monitor
       
-      def initialize(interval, next_run=nil, &block)
-        @interval, @block = interval, block
+      def initialize(qualified_monitor_name, interval, next_run=nil)
+        @monitor, @interval =  qualified_monitor_name, interval
         @next_run = next_run || Time.new.to_i
       end
       
@@ -70,7 +70,7 @@ module Critical
       end
       
       def run_task(task)
-        queue.push task.block
+        queue.push task.monitor
         task.succ!
         schedule task
       end

@@ -3,7 +3,7 @@ module Critical
     
     # DeferredHandler stores output in memory for later use, like sending over
     # the network or in unit tests.
-    class DeferredHandler < MetricBaseHandler
+    class Deferred < Base
 
       attr_accessor :collected_at
       attr_reader   :failed_in, :errors, :data
@@ -52,11 +52,11 @@ module Critical
 
     end
     
-    class DeferredGroupHandler < GroupBaseHandler
-      
-      def metric_report
-        DeferredHandler.new(:epic_fail_fixme)
-      end
-    end
+    # class DeferredGroupHandler < GroupBaseHandler
+    #   
+    #   def metric_report
+    #     DeferredHandler.new(:epic_fail_fixme)
+    #   end
+    # end
   end
 end

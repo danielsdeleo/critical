@@ -1,8 +1,8 @@
 # df.rb: An example using critical to process information from df(1)
 # and make assertions about it.
 
-Critical::OutputHandler::GroupDispatcher.configure do |dispatcher|
-  dispatcher.handler :text
+Critical::OutputHandler::Dispatcher.configure do |out|
+  out.handler :text, :output => STDOUT
 end
 
 # Metrics are functions (methods, really) that gather data and present it in

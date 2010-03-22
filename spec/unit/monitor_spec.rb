@@ -58,7 +58,7 @@ describe Monitor do
     before do
       @metric_class = Class.new(Critical::Monitor)
       @metric = @metric_class.new
-      @report = OutputHandler::DeferredHandler.new(nil)
+      @report = OutputHandler::Deferred.new(nil)
     end
     
     it "raises an error when the class has no command or block defined" do
@@ -195,7 +195,7 @@ describe Monitor do
     before do
       @metric_class = Class.new(Critical::Monitor)
       @metric_class.send(:attr_accessor, :snitch)
-      @output_handler = OutputHandler::DeferredHandler.new(nil)
+      @output_handler = OutputHandler::Deferred.new(nil)
     end
     
     it "accepts a metric output handler for the duration of the collection" do
@@ -282,7 +282,7 @@ describe Monitor do
       @metric_class.monitors(:filesystem)
       @metric_class.collects { :no_op_for_testing }
       
-      @output_handler = OutputHandler::DeferredHandler.new(nil)
+      @output_handler = OutputHandler::Deferred.new(nil)
     end
     
     it "uses a unique report object for each collection run" do

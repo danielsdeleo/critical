@@ -56,6 +56,7 @@ module Critical
       define_default_attribute(attribute) unless default_attr_defined?
     end
     
+    attr_accessor :fqn
     attr_reader   :processing_block, :creator_line, :report
     
     def initialize(arg=nil, &block)
