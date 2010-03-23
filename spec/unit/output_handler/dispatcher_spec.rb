@@ -15,6 +15,13 @@ describe OutputHandler::Dispatcher do
                                         OutputHandler::Deferred => {:some_option => :a_setting}}
     end
     
+    it "aliases handler() to via() and as()" do
+      @handler_class.via  :deferred, :some_option => :a_setting
+      @handler_class.as   :text, :output => STDOUT
+      @handler_class.handlers.should == {OutputHandler::Text    => {:output => STDOUT}, 
+                                        OutputHandler::Deferred => {:some_option => :a_setting}}
+    end
+    
     it "raises an error when you try to add a handler that doesn't exist" do
       @handler_class = Class.new(OutputHandler::Dispatcher)
       lambda {@handler_class.handler(:doesnotexist, :opts=>:dontmatterhere)}.should raise_error

@@ -48,7 +48,7 @@ describe Application::Configuration do
       @config.source_files.sort.should == expected.sort
     end
     
-    it "specifies a pidfile" do
+    it "sets the pidfile location" do
       @config.stub!(:argv).and_return(%w{-p /var/pids/critical.pid})
       @config.parse_opts
       @config.pidfile.should == "/var/pids/critical.pid"
@@ -64,7 +64,9 @@ describe Application::Configuration do
       @config.daemonize?.should be_true
     end
     
-    it "specifies the default monitor interval"
+    it "sets the default monitor interval"
+    
+    it "sets the logfile location"
     
     it "allows an arbitrary string to be eval'd" do
       breadcrumb = rand(1023).to_s(16)
@@ -72,5 +74,27 @@ describe Application::Configuration do
       @config.parse_opts
       Critical::TestHarness::ConfigSpecBreadcrumb.should == breadcrumb
     end
+  end
+  
+  describe "in the configuration file" do
+    before do
+      @config = Critical::Application::Configuration.instance
+      @config.reset!
+      @stdout = StringIO.new
+      @config.stub!(:stdout).and_return(@stdout)
+    end
+    
+    it "allows the output dispatcher to be configured via #reporting" do
+      dispatcher = nil
+      @config.reporting do |report|
+        dispatcher = report
+      end
+      dispatcher.should == Critical::OutputHandler::Dispatcher
+    end
+    
+    it "allows the log formatter to be configured via log_format" do
+      @config.log_formatter.should == Critical::Loggable::Formatters::Ruby
+    end
+    
   end
 end

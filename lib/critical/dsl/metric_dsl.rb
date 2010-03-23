@@ -3,7 +3,7 @@ module Critical
     module MetricDSL
       extend self
       extend Loggable
-      # define a new metric collector
+      # define a new metric
       def Metric(metric_name)
         metric_collector = Class.new(::Critical::Monitor)
         metric_class_name = Critical::Metrics.const_set(metric_name.to_s.capitalize, metric_collector)

@@ -83,6 +83,18 @@ module Critical
         Kernel.eval(ruby_code, TOPLEVEL_BINDING, "-e command line option", @eval_line_no)
       end
       
+      # Yields a block to OutputHandler::Dispatcher.configure
+      def reporting(&block)
+        OutputHandler::Dispatcher.configure(&block)
+      end
+      
+      # Returns the Loggable::Formatters::Ruby class so you can configure the fields it includes
+      def log_formatter
+        Loggable::Formatters::Ruby
+      end
+      
+      private
+      
       def validate_configuration
         if @source_files.empty?
           self.flash_notice = "No source files loaded, nothing to monitor."

@@ -4,19 +4,24 @@ module Critical
     # STDOUT, a log file, and email at the same time
     class Dispatcher < Base
       
-      def self.configure
-        yield self
-      end
+      class << self
+        def configure
+          yield self
+        end
       
-      def self.handler(type, opts={})
-        handlers[fetch_handler_class(type)] = opts
-        yield opts if block_given?
-      end
+        def handler(type, opts={})
+          handlers[fetch_handler_class(type)] = opts
+          yield opts if block_given?
+        end
       
-      def self.handlers
-        @handlers ||= {}
+        alias :via :handler
+        alias :as  :handler
+        
+        def handlers
+          @handlers ||= {}
+        end
+        
       end
-      
       private
       
       def self.fetch_handler_class(klass_or_symbol)
