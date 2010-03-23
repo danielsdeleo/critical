@@ -28,7 +28,7 @@ module Critical
       help_footer "http://github.com/danielsdeleo/critical"
       
       def self.configure!
-        self.instance.parse_opts
+        self.instance.configure
       end
       
       attr_reader :source_files
@@ -43,10 +43,14 @@ module Critical
         @eval_line_no   = nil
       end
       
+      def configure
+        help unless parse_opts
+      end
+      
       option "Print the version and exit", :short => :v
       def version
         stdout.puts help_banner
-        exit 1
+        exit 2
       end
       
       option "Print this message and exit", :short => :h

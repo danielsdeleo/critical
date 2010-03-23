@@ -77,6 +77,7 @@ module Critical
       end
     
       module InstanceMethods
+        attr_accessor :flash_notice
       
         def stdout
           STDOUT
@@ -93,7 +94,7 @@ module Critical
       
         def help_message
           descriptions = self.class.descriptions
-          message = help_banner ? help_banner + "\n\n" : ""
+          message = help_message_header ? help_message_header + "\n\n" : ""
           message << "Usage: #{File.basename($0)} (options)\n"
         
           long_opts = descriptions.map { |d| d[1] }
@@ -108,20 +109,26 @@ module Critical
       
         # Parses ARGV and applies all the options
         def parse_opts
-          parse_argv
-          apply_options
+          if parse_argv
+            apply_options
+            true
+          end
         end
-      
+        
         def parsed_options
           @parsed_options ||= []
         end
       
         def parse_argv
           while opt = argv.shift
-            assert_valid_option!(opt)
-            method_to_invoke  = option_to_method(opt)
-            method_args       = extract_option_args(opt)
-            parsed_options << {:method => method_to_invoke, :args => method_args}
+            if valid_option?(opt)
+              method_to_invoke  = option_to_method(opt)
+              method_args       = extract_option_args(opt)
+              parsed_options << {:method => method_to_invoke, :args => method_args}
+            else
+              invalid_option(opt)
+              return false
+            end
           end
           parsed_options
         end
@@ -149,6 +156,10 @@ module Critical
           end
           opts_with_args
         end
+        
+        def help_message_header
+          flash_notice || help_banner
+        end
       
         def help_banner
           self.class.help_banner
@@ -168,9 +179,9 @@ module Critical
         def valid_options
           self.class.valid_options
         end
-      
-        def assert_valid_option!(opt)
-          valid_options[opt] || invalid_option(opt)
+        
+        def valid_option?(opt)
+          !!valid_options[opt]
         end
       
         def option_to_method(opt)
@@ -182,8 +193,8 @@ module Critical
           argv.slice!(0...number_of_args)
         end
       
-        def invalid_option(option)
-          raise InvalidCliOption, "I don't respond to the the '#{option}' option. Better luck next time :("
+        def invalid_option(opt)
+          self.flash_notice = "Invalid option: #{opt}"
         end
 
       end
