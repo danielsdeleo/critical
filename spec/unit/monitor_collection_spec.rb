@@ -6,6 +6,10 @@ describe MonitorCollection do
     @collection.reset!
   end
   
+  it "is has no monitors after a reset" do
+    @collection.should be_empty
+  end
+  
   describe "adding metrics to the collection" do
     before do
       @metric_class = Class.new(Critical::Monitor)

@@ -45,6 +45,7 @@ module Critical
       
       def configure
         help unless parse_opts
+        validate_configuration
       end
       
       option "Print the version and exit", :short => :v
@@ -80,6 +81,13 @@ module Critical
         @eval_line_no ||= 0
         @eval_line_no += 1
         Kernel.eval(ruby_code, TOPLEVEL_BINDING, "-e command line option", @eval_line_no)
+      end
+      
+      def validate_configuration
+        if @source_files.empty?
+          self.flash_notice = "No source files loaded, nothing to monitor."
+          help
+        end
       end
       
     end

@@ -12,6 +12,10 @@ module Critical
       reset!
     end
     
+    def empty?
+      @monitors.empty?
+    end
+    
     def reset!
       @monitors, @tasks = {}, []
     end
