@@ -44,7 +44,16 @@ module Critical
       end
       
       def configure
-        help unless parse_opts
+        # Parse the options, bail out if they're malformed
+        help unless parse_argv
+        # set the log level as early as possible
+        apply_option :log_level
+        # Apply the config file setting, read the config, then apply CLI opts
+        # so cli opts can take precedence
+        apply_option :config_file
+        read_config_file
+        apply_options
+        # Run a sanity check on the config
         validate_configuration
       end
       
@@ -64,6 +73,19 @@ module Critical
       def require(file_or_dir)
         @source_files << File.expand_path(file_or_dir)
       end
+      
+      option "The configuration file to use", :short => :c
+      def config_file=(config_file)
+        @config_file = File.expand_path(config_file)
+      end
+      attr_reader :config_file
+      
+      option "Set the verbosity of critical's error log", :short => :l, :arg => "[debug|info|warn|error|fatal]"
+      def log_level=(verbosity)
+        pp :log_level_set => verbosity
+        Loggable::Logger.instance.level = verbosity.downcase
+      end
+      attr_reader :log_level
       
       cli_attr_accessor :pidfile, "The file where the process id is stored", :short => :p
       
@@ -89,17 +111,36 @@ module Critical
       end
       
       # Returns the Loggable::Formatters::Ruby class so you can configure the fields it includes
-      def log_formatter
+      def log_format
         Loggable::Formatters::Ruby
+      end
+      
+      def read_config_file
+        if config_file && File.file?(config_file)
+          log.debug { "Loading configuration file #{config_file}" }
+          Kernel.load config_file
+        elsif config_file
+          reason = File.exist?(config_file) ? "isn't a file" : "doesn't exist"
+          self.flash_notice = "The configuration file you specified: #{config_file} #{reason}"
+          help
+        else
+          log.debug { "No config file specified." }
+        end
       end
       
       private
       
       def validate_configuration
         if @source_files.empty?
-          self.flash_notice = "No source files loaded, nothing to monitor."
-          help
+          invalid_config "No source files loaded, nothing to monitor."
+        elsif MonitorCollection.instance.empty?
+          invalid_config "Source files contain no monitors, nothing to do."
         end
+      end
+      
+      def invalid_config(message)
+        self.flash_notice = message
+        help
       end
       
     end

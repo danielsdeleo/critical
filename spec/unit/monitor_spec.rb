@@ -78,7 +78,6 @@ describe Monitor do
     
     it "passes its report object on to the command output object" do
       @metric_class.collects { "some_system_data" }
-      puts @metric.result
       @metric.result.report.should equal @metric.report
     end
   end

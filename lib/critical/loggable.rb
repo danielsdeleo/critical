@@ -81,18 +81,18 @@ module Critical
       def reset!
         @logger = ::Logger.new(io_out)
         @logger.formatter = Formatters::Ruby.new
-        @logger.level = level_to_const(:debug)
+        @logger.level = level_to_const(Critical.config.log_level || :debug)
       end
       
       def io_out
         STDOUT
       end
       
-      def level_to_const(level)
-        unless level = LEVELS[level.to_sym]
-          raise InvalidLogLevel, "'#{level}' is not a valid log level. Valid levels are #{LEVELS.join(", ")}"
+      def level_to_const(level_str)
+        unless level_int = LEVELS[level_str.to_sym]
+          raise InvalidLogLevel, "'#{level_str}' is not a valid log level. Valid levels are #{LEVELS.keys.join(", ")}"
         end
-        level
+        level_int
       end
       
       def level=(new_level)

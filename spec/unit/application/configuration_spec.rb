@@ -10,8 +10,38 @@ describe Application::Configuration do
   it "returns itself via a convenience method on the Critical module" do
     ::Critical.config.should equal ::Critical::Application::Configuration.instance
   end
+  
+  describe "loading the config file" do
+    before do
+      @config = Critical::Application::Configuration.instance
+      @config.reset!
+      @stdout = StringIO.new
+      @config.stub!(:stdout).and_return(@stdout)
+    end
     
-  it "loads a configuration file"
+    it "successfully loads a valid configuration file" do
+      $config_file_loaded = false
+      @config.config_file = File.dirname(__FILE__) + "/../../fixtures/config/basic.rb"
+      @config.read_config_file
+      $config_file_loaded.should be_true
+    end
+
+    it "prints the help message with an explanation and exits if the config file doesn't exist" do
+      @config.should_receive :exit
+      conf = @config.config_file = File.dirname(__FILE__) + "/../../fixtures/config/no_such_thing_dude.rb"
+      expanded = File.expand_path(conf)
+      @config.read_config_file
+      @stdout.string.should match Regexp.new("The configuration file you specified: #{expanded} doesn't exist")
+    end
+    
+    it "prints the help message with an explanation and exits if the config file is actaully a directory or pipe or whatever" do
+      @config.should_receive :exit
+      conf = @config.config_file = File.dirname(__FILE__) + "/../../fixtures/config"
+      expanded = File.expand_path(conf)
+      @config.read_config_file
+      @stdout.string.should match Regexp.new("The configuration file you specified: #{expanded} isn't a file")
+    end
+  end
   
   describe "reading command line options" do
     before do
@@ -64,9 +94,21 @@ describe Application::Configuration do
       @config.daemonize?.should be_true
     end
     
+    it "sets the config file location" do
+      @config.stub!(:argv).and_return(%w{-c /path/to/config/file})
+      @config.parse_opts
+      @config.config_file.should == "/path/to/config/file"
+    end
+    
     it "sets the default monitor interval"
     
     it "sets the logfile location"
+    
+    it "sets the log level" do
+      @config.stub!(:argv).and_return(%w{-l FATAL})
+      @config.parse_opts
+      Loggable::Logger.instance.level.should == ::Logger::FATAL
+    end
     
     it "allows an arbitrary string to be eval'd" do
       breadcrumb = rand(1023).to_s(16)
@@ -93,7 +135,7 @@ describe Application::Configuration do
     end
     
     it "allows the log formatter to be configured via log_format" do
-      @config.log_formatter.should == Critical::Loggable::Formatters::Ruby
+      @config.log_format.should == Critical::Loggable::Formatters::Ruby
     end
     
   end
