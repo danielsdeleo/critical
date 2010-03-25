@@ -49,7 +49,7 @@ module Critical
         # set the log level as early as possible
         apply_option :log_level
         # Apply the config file setting, read the config, then apply CLI opts
-        # so cli opts can take precedence
+        # so cli opts can take precedence over config file settings
         apply_option :config_file
         read_config_file
         apply_options

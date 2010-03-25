@@ -15,9 +15,14 @@ module TestHarness
   end
   
   class MonitorExample
+    attr_accessor :fqn
     attr_reader :initialized_with
     def initialize(*args)
       @initialized_with = args
+    end
+    
+    def to_s
+      @initialized_with.first.to_s + "_faked"
     end
   end
 end
@@ -25,8 +30,8 @@ end
 describe DSL::MonitorDSL do
   before do
     @dsl_user = TestHarness::MonitorDSLImplementer.new
-    @metric_collector = TestHarness::MonitorExample
-    Critical::DSL::MonitorDSL.define_metric(:ping, @metric_collector)
+    @metric = TestHarness::MonitorExample
+    Critical::DSL::MonitorDSL.define_metric(:ping, @metric)
   end
   
   it "adds a DSL method for a new metric collector" do
@@ -34,7 +39,7 @@ describe DSL::MonitorDSL do
   end
   
   it "creates a new instance of a class when the DSL method is called" do
-    @dsl_user.ping.should be_an_instance_of(@metric_collector)
+    @dsl_user.ping.should be_an_instance_of(@metric)
   end
   
   it "passes the first argument to the DSL method to the initializer of the metric class" do
@@ -89,6 +94,14 @@ describe DSL::MonitorDSL do
       snitch.should == :yep
     end
     
+    it "sets a monitor's fully qualified name" do
+      monitor = nil
+      @dsl_user.Monitor(:network) do
+        monitor = ping("the_router")
+      end
+      monitor.fqn.should == "/network/#{monitor.to_s}"
+    end
+
     it "sets the interval" do
       snitch = nil
       @dsl_user.every(10 => :minutes) do

@@ -25,80 +25,32 @@ describe MonitorCollection do
       @collection.tasks.should have(1).task
     end
     
-    it "sets a monitor's fully qualified name" do
-      monitor = @monitor
-      @collection.Monitor(:disks) do
-        push monitor
-      end
-      monitor.fqn.should == "/disks/df()"
-    end
-
-    it "maps monitors into a nested hash" do
-      monitor = @monitor
-      @collection.Monitor(:unix_boxes) do
-        Monitor(:disks) do
-          push monitor
-        end
-      end
-      @collection.monitors.should == {:unix_boxes => {:disks => {:monitors => [@monitor]}}}
+    it "stores and finds monitors by fully qualified name" do
+      @monitor.fqn = "/unix_boxes/disks/df(/tmp)"
+      @collection.push @monitor
+      @collection.find("/unix_boxes/disks/df(/tmp)").should equal(@monitor)
     end
     
-    it "adds monitors to an existing nested hash" do
-      monitor = @monitor
-      @collection.Monitor(:unix_boxes) do
-        Monitor(:disks) do
-          push monitor
-          push monitor
-        end
-        Monitor(:network) do
-          push monitor
-        end
-      end
-      expected = {:unix_boxes => {:disks => {:monitors => [@monitor, @monitor]}, :network => {:monitors => [@monitor]}}}
-      @collection.monitors.should == expected
+    it "stores multiple monitors in the same namespace if they have different short names" do
+      @monitor.fqn = "/unix_boxes/disks/df(/)"
+      @collection.push @monitor
+      @monitor.fqn = "/unix_boxes/disks/df(/var)"
+      @collection.push @monitor
+      @collection.find("/unix_boxes/disks/df(/)").should equal(@monitor)
+      @collection.find("/unix_boxes/disks/df(/var)").should equal(@monitor)
     end
     
-    it "either replaces, reopens, or raises when adding the same monitor twice in a namespace" do
-      monitor = @monitor
-      @collection.Monitor(:unix_boxes) do
-        Monitor(:disks) do
-          push monitor
-          push monitor
-        end
-      end
-      pending
-    end
-    
-    it "allows monitors to peacefully coexist with sub-namespaces" do
-      monitor = @monitor
-      @collection.Monitor(:unix_boxes) do
-        Monitor(:disks) do
-          push monitor
-        end
-        push monitor
-      end
-      @collection.monitors.should == {:unix_boxes => {:monitors => [@monitor], :disks => {:monitors => [@monitor]}}}
-    end
-    
-    it "looks up monitors given the monitor's name and namespace" do
-      monitor = @monitor
-      @collection.Monitor(:unix_boxen) do
-        Monitor(:disks) do
-          push monitor
-        end
-      end
-      @collection.find(:unix_boxen, :disks, 'df()').should equal(monitor)
-      @collection.find('unix_boxen/disks/df()').should equal(monitor)
+    it "either replaces a monitor when adding another one with the same name in a namespace" do
+      @monitor.fqn = "/unix_boxes/disks/df(/var)"
+      monitor1 = @monitor.dup
+      monitor2 = @monitor.dup
+      @collection.push monitor1
+      @collection.push monitor2
+      @collection.find("/unix_boxes/disks/df(/var)").should equal monitor2
     end
     
     it "gives nil if the monitor cannot be found" do
       @collection.find('df()').should be_nil
-    end
-    
-    it "splits a namspace string into its elements" do
-      @collection.split_namespaces('unix_boxen/disks/df()').should == [:unix_boxen, :disks, 'df()']
-      @collection.split_namespaces('unix_boxen/disks/df(/)').should == [:unix_boxen, :disks, 'df(/)']
-      @collection.split_namespaces('/unix_boxen/disks/df(/)').should == [:unix_boxen, :disks, 'df(/)']
     end
     
     it "gives the current namespace as a string" do

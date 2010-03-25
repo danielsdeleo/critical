@@ -19,6 +19,7 @@ module Critical
         class_eval(<<-METHOD, __FILE__, __LINE__ + 1)
           def #{method_name.to_s}(arg=nil, &block)
             monitor = monitor_class_for[:#{method_name}].new(arg, &block)
+            monitor.fqn = current_namespace + '/' + monitor.to_s
             push monitor
             monitor
           end 
@@ -38,6 +39,10 @@ module Critical
         @namespace ||= []
       end
     
+      def current_namespace
+        "/#{namespace.join('/')}"
+      end
+
       def every(interval_spec, &block)
         @previous_interval, @interval = @interval, interval_from_spec(interval_spec)
         instance_eval(&block)
