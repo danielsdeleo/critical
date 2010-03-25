@@ -53,15 +53,6 @@ describe MonitorCollection do
       @collection.find('df()').should be_nil
     end
     
-    it "gives the current namespace as a string" do
-      namespace_str = nil
-      @collection.Monitor(:unix_boxes) do
-        Monitor(:disks) do
-          namespace_str = current_namespace
-        end
-      end
-      namespace_str.should == "/unix_boxes/disks"
-    end
   end
   
 end

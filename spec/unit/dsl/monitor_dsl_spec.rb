@@ -82,6 +82,16 @@ describe DSL::MonitorDSL do
       snitch.should == :snitchy
     end
     
+    it "gives the current namespace as a string" do
+      namespace_str = nil
+      @dsl_user.Monitor(:unix_boxes) do
+        Monitor(:disks) do
+          namespace_str = current_namespace
+        end
+      end
+      namespace_str.should == "/unix_boxes/disks"
+    end
+
     it "yields itself to blocks with arity of one" do
       snitch = nil
       @dsl_user.Monitor(:unix_hosts) do |unix_hosts|
