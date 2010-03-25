@@ -100,8 +100,6 @@ describe Application::Configuration do
       @config.config_file.should == "/path/to/config/file"
     end
     
-    it "sets the default monitor interval"
-    
     it "sets the logfile location"
     
     it "sets the log level" do
