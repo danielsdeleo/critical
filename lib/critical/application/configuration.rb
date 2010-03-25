@@ -53,8 +53,6 @@ module Critical
         apply_option :config_file
         read_config_file
         apply_options
-        # Run a sanity check on the config
-        validate_configuration
       end
       
       option "Print the version and exit", :short => :v
@@ -128,15 +126,15 @@ module Critical
         end
       end
       
-      private
-      
-      def validate_configuration
+      def validate_configuration!
         if @source_files.empty?
           invalid_config "No source files loaded, nothing to monitor."
         elsif MonitorCollection.instance.empty?
           invalid_config "Source files contain no monitors, nothing to do."
         end
       end
+      
+      private
       
       def invalid_config(message)
         self.flash_notice = message

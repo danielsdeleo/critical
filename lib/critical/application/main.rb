@@ -10,6 +10,7 @@ module Critical
         log.debug {"Critical is starting up, current PID: #{Process.pid}"}
         trap_signals
         load_sources
+        validate_config
         daemonize! if daemonizing?
         start_monitor_runner
         start_scheduler
@@ -67,6 +68,12 @@ module Critical
       
       def config
         Critical.config
+      end
+      
+      # Run a sanity check on the config. Must run after loading files to
+      # correctly detect empty monitor collection
+      def validate_config
+        config.validate_configuration!
       end
       
     end

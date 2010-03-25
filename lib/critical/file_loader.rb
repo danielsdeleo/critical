@@ -35,6 +35,7 @@ module Critical
     
     def files_in_dir(dir)
       if File.directory?(dir)
+        log.debug { "Searching directory #{dir} for source files" }
         filenames = Dir["#{dir}/**/*.rb"]
         filenames.map! { |f| File.expand_path(f) }
         filenames
