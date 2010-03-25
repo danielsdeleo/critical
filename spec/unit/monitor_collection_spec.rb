@@ -55,4 +55,29 @@ describe MonitorCollection do
     
   end
   
+  describe "enumerating over the monitors in the collection" do
+    before do
+      @metric_class = Class.new(Critical::Monitor)
+      @foo_monitor = @metric_class.new
+      @foo_monitor.fqn = "foo"
+      @bar_monitor = @metric_class.new
+      @bar_monitor.fqn = "bar"
+      @baz_monitor = @metric_class.new
+      @baz_monitor.fqn = "baz"
+      @collection << @foo_monitor << @bar_monitor << @baz_monitor
+    end
+    
+    it "yields the monitors via #each" do
+      monitors = []
+      @collection.each { |monitor| monitors << monitor }
+      monitors.should == [@foo_monitor, @bar_monitor, @baz_monitor]
+    end
+    
+    it "can be enumerated with other enumerable methods" do
+      @collection.should respond_to :detect
+      @collection.should respond_to :each_with_index
+      @collection.should respond_to :grep
+    end
+  end
+  
 end

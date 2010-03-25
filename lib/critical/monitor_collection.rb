@@ -3,6 +3,7 @@ require 'singleton'
 module Critical
   class MonitorCollection
     include Loggable
+    include Enumerable
     include Singleton
     include DSL::MonitorDSL
     include Expectations::Matchers
@@ -23,11 +24,17 @@ module Critical
     def push(monitor)
       log.debug { "adding monitor #{monitor.fqn} to collection"}
       @monitors[monitor.fqn] = monitor
-      @tasks << Scheduler::Task.new(monitor.fqn, (interval || 600)) {|output_handler| monitor.collect(output_handler)}
+      @tasks << Scheduler::Task.new(monitor.fqn, (interval || 600))
+      self
     end
+    alias :<< :push
     
     def find(name)
       @monitors[name]
+    end
+    
+    def each
+      @monitors.values.each { |mon| yield mon }
     end
     
   end
