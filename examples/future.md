@@ -6,8 +6,10 @@
 * validate monitors attributes (format, presence)
 
 ## TODO.after ##
+* debug method within monitors, take a block and pp the output when verbosity is on for collection
 * pre-forking shamelessly stolen from unicorn
-* unencumbered/cucumber integration *or* cheap knock-off
+* unencumbered/cucumber integration *and|or* cheap knock-off
+* log file load/search tool for ruby formatted logs -- a simple library to do that, plus irb wrapping
 
 ## TODO.sometime ##
 * live reload
