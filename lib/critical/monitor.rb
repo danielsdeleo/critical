@@ -151,9 +151,9 @@ module Critical
       begin
         result = 
           if collection_command?
-            `#{command_with_substitutions}`.criticalize 
+            `#{command_with_substitutions}`.criticalize(report)
           else
-            instance_eval(&collection_block).criticalize
+            instance_eval(&collection_block).criticalize(report)
           end
       rescue Exception => e
         report.collection_failed(e)

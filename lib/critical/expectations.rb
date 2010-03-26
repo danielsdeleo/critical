@@ -34,6 +34,7 @@ module Critical
       def exactly(arg)
         {:name => 'exactly', :arg => arg, :block => lambda {|other| other == arg}}
       end
+      alias :equal_to :exactly
     
       def lte(arg)
         {:name => 'less than or equal to', :arg => arg, :block => lambda { |other| other <= arg }}

@@ -78,7 +78,7 @@ describe Monitor do
     
     it "passes its report object on to the command output object" do
       @metric_class.collects { "some_system_data" }
-      @metric.result.report.should equal @metric.report
+      @metric.result.critical_error_report.should equal @metric.report
     end
   end
   
