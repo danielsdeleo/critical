@@ -1,11 +1,11 @@
 require 'rubygems'
 require "restclient"
 
-Metric(:http_get) do |http_get|
-  http_get.monitors :url
-  http_get.collects { RestClient.get(url) }
-  http_get.reports(:status => :integer) {result.code}
-  http_get.reports(:content) { result.body }
+Metric(:http_get) do
+  monitors :url
+  collects { RestClient.get(url) }
+  reports(:status => :integer) {result.code}
+  reports(:content) { result.body }
 end
 
 Monitor(:web) do
