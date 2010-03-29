@@ -32,6 +32,5 @@ describe Application::Main do
     @main.start_scheduler
   end
   
-  it "runs the monitor_runner"
 end
 
