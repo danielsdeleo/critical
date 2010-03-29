@@ -11,3 +11,5 @@ module Critical
 end
 
 include Critical
+
+Critical.config.log_level = :fatal

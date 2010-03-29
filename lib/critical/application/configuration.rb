@@ -80,8 +80,8 @@ module Critical
       
       option "Set the verbosity of critical's error log", :short => :l, :arg => "[debug|info|warn|error|fatal]"
       def log_level=(verbosity)
-        pp :log_level_set => verbosity
-        Loggable::Logger.instance.level = verbosity.downcase
+        verbosity = verbosity.respond_to?(:downcase) ? verbosity.downcase : verbosity
+        Loggable::Logger.instance.level = verbosity
       end
       attr_reader :log_level
       

@@ -10,16 +10,29 @@ describe DSL::MetricDSL do
   
   describe "defining new metrics" do
     before do
-      @value_in_closure = nil
-      @new_metric = Critical::DSL::MetricDSL.Metric(:squishiness) do |squishiness|
-        @value_in_closure = squishiness
+      $VERBOSE = nil # yes, I know I'm redefining constant blah blah blah
+      begin
+        value_in_closure = nil
+        @new_metric = Critical::DSL::MetricDSL.Metric(:squishiness) do
+          value_in_closure = self
+        
+          def this_should_be_an_instance_method
+          end
+        end
+        @value_in_closure = value_in_closure
+      ensure
+        $VERBOSE = true # but warnings are good in general
       end
     end
     
     it "creates a new metric collector class" do
       @new_metric.should be_an_instance_of(Class)
       @new_metric.should < Critical::Monitor
-      @new_metric.should == @value_in_closure
+    end
+    
+    it "evaluates the block as a class body" do
+      @value_in_closure.should == Critical::Metrics::Squishiness
+      @new_metric.new.should respond_to(:this_should_be_an_instance_method)
     end
     
     it "sets the metric name on the collector class" do
