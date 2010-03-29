@@ -7,17 +7,17 @@ module Critical
       def initialize(title, story)
         @title, @story, @monitors = title, story, []
       end
-      
+
       def push(monitor)
         @monitors << monitor
         self
       end
       alias :<< :push
-      
+
       def story_data
         story.story_data
       end
-      
+
       def collect(output_handler)
         @monitors.each { |m| m.collect(output_handler) }
       end
@@ -36,7 +36,7 @@ module Critical
     def to_s
       "story(#{title})"
     end
-    
+
     def collect(output_handler)
       steps.each { |s| s.collect(output_handler) }
     end
