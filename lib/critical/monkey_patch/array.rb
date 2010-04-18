@@ -3,7 +3,7 @@ module Critical
     module Array
 
       def field(n)
-        self[n].criticalize(critical_error_report)
+        self[n]
       end
 
     end

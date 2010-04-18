@@ -3,7 +3,6 @@ module Critical
   end
 end
 
-require 'critical/core_ext'
 require 'critical/loggable'
 require 'critical/scheduler'
 require 'critical/output_handler'

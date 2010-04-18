@@ -75,11 +75,6 @@ describe Monitor do
       @metric_class.collects("echo ':string_to_echo'")
       @metric.result.strip.should == 'echo _this_'
     end
-
-    it "passes its report object on to the command output object" do
-      @metric_class.collects { "some_system_data" }
-      @metric.result.critical_error_report.should equal @metric.report
-    end
   end
 
   describe "defining reporting methods" do
@@ -275,6 +270,19 @@ describe Monitor do
     end
 
     describe "classifying the state of the monitored property" do
+      
+      it "reports expectation failures as critical" do
+        @metric_instance = @metric_class.new { expect {false} }
+        @metric_instance.collect(@output_handler)
+        @metric_instance.metric_status.should == :critical
+      end
+      
+      it "reports expectation failures as warning when given :warning as the argument" do
+        @metric_instance = @metric_class.new { expect(:warning) {false} }
+        @metric_instance.collect(@output_handler)
+        @metric_instance.metric_status.should == :warning
+      end
+      
       it "reports results as critical" do
         @metric_instance = @metric_class.new { critical {true} }
         @metric_instance.collect(@output_handler)
@@ -304,6 +312,28 @@ describe Monitor do
         metric = @metric_class.new { raise Exception, "an example exception" }
         metric.collect(@output_handler)
         metric.metric_status.should == :critical
+      end
+
+      it "rescues errors in the assertion block and sets the status to warning/critical" do
+        @metric_instance = @metric_class.new { warning {nil.no_method_error} }
+        @metric_instance.collect(@output_handler)
+        @metric_instance.metric_status.should == :warning
+
+        @metric_instance = @metric_class.new { critical {nil.no_method_error} }
+        @metric_instance.collect(@output_handler)
+        @metric_instance.metric_status.should == :critical
+      end
+
+      it "optionally supports rspec for making assertions about values" do
+        value = nil
+        @metric_class.enable_rspec
+        @metric_instance = @metric_class.new { expect {value.should be_nil } }
+        @metric_instance.collect(@output_handler)
+        @metric_instance.metric_status.should == :ok
+
+        @metric_instance = @metric_class.new { expect { value.should_not be_nil} }
+        @metric_instance.collect(@output_handler)
+        @metric_instance.metric_status.should == :critical
       end
     end
 
