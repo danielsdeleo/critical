@@ -24,6 +24,7 @@ module Critical
 
     end
 
+    attr_accessor :fqn
     attr_reader :title, :steps
 
     def initialize(title, &block)

@@ -8,6 +8,11 @@ describe StoryMonitor do
   it "has a title" do
     @story_monitor.title.should == "Users can sign up for a blog and post articles"
   end
+  
+  it "has a fully qualified name" do
+    @story_monitor.fqn = "story(Users can sign up for a blog and post articles)"
+    @story_monitor.fqn.should == "story(Users can sign up for a blog and post articles)"
+  end
 
   it "has no steps when first created" do
     @story_monitor.should have(0).steps
@@ -52,6 +57,15 @@ describe StoryMonitor do
       s.step  "Note how weirdly meta this is."
     end
     story_monitor.should have(4).steps
+  end
+  
+  it "instance evals a block with arity of 0" do
+    story_monitor = StoryMonitor.new("create a story monitor with a 0 arity block") do
+      step "When I pass a block of arity 0 to the story monitor"
+      step "Then I note that I can't use #when or #then b/c they're ruby keywords"
+      step "But otherwise it works just fine"
+    end
+    story_monitor.should have(3).steps
   end
 
   it "is scheduled as a whole story"

@@ -3,6 +3,7 @@ module Critical
   end
   
   class Monitor
+    STATUSES = {:ok => 0, :warning => 1, :critical => 2}
     
     class << self
       attr_accessor :metric_name
@@ -37,11 +38,11 @@ module Critical
         
         define_method(report_name) do
           uncoerced_value = instance_eval(&method_body)
-          proxify_reporting_result(coerce(uncoerced_value, desired_output_class), report_name)
+          coerce(uncoerced_value, desired_output_class)
         end
       else
         define_method(report_name.to_sym) do
-          proxify_reporting_result(instance_eval(&method_body), report_name)
+          instance_eval(&method_body)
         end
       end
     end
@@ -57,7 +58,7 @@ module Critical
     end
     
     attr_accessor :fqn
-    attr_reader   :processing_block, :report
+    attr_reader   :processing_block, :report, :metric_status
     
     def initialize(arg=nil, &block)
       self.default_attribute= arg if arg && self.respond_to?(:default_attribute=)
@@ -99,6 +100,22 @@ module Critical
       run_processing_block
     end
     
+    def critical(&block)
+      if instance_eval(&block)
+        update_status(:critical)
+      end
+    end
+    
+    def warning(&block)
+      if instance_eval(&block)
+        update_status(:warning)
+      end
+    end
+    
+    def update_status(status)
+      @metric_status = status if STATUSES[status] > STATUSES[@metric_status]
+    end
+    
     private
     
     def self.define_default_attribute(attr_name)
@@ -121,12 +138,14 @@ module Critical
         instance_eval(&processing_block) if processing_block.arity <= 0
         processing_block.call(self)      if processing_block.arity > 0
       rescue Exception => e
+        update_status(:critical)
         report.processing_failed(e)
       end
     end
     
     def reset!
       @result, @report = nil, nil
+      @metric_status = :ok
     end
     
     def collection_command
@@ -156,6 +175,7 @@ module Critical
             instance_eval(&collection_block).criticalize(report)
           end
       rescue Exception => e
+        update_status(:critical)
         report.collection_failed(e)
       end
       result
@@ -181,11 +201,6 @@ module Critical
       else
         raise ArgumentError, "Can't coerce values to type `#{type}'"
       end
-    end
-    
-    def proxify_reporting_result(result_obj, reported_value_name)
-      result_obj = result_obj.target if result_obj.respond_to?(:target)
-      Proxies::MetricReportProxy.new(result_obj, self, reported_value_name)
     end
     
     def assert_collection_block_or_command_exists!
