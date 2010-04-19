@@ -270,19 +270,19 @@ describe Monitor do
     end
 
     describe "classifying the state of the monitored property" do
-      
+
       it "reports expectation failures as critical" do
         @metric_instance = @metric_class.new { expect {false} }
         @metric_instance.collect(@output_handler)
         @metric_instance.metric_status.should == :critical
       end
-      
+
       it "reports expectation failures as warning when given :warning as the argument" do
         @metric_instance = @metric_class.new { expect(:warning) {false} }
         @metric_instance.collect(@output_handler)
         @metric_instance.metric_status.should == :warning
       end
-      
+
       it "reports results as critical" do
         @metric_instance = @metric_class.new { critical {true} }
         @metric_instance.collect(@output_handler)
