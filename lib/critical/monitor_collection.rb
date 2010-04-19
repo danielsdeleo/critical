@@ -6,7 +6,6 @@ module Critical
     include Enumerable
     include Singleton
     include DSL::MonitorDSL
-    include Expectations::Matchers
     
     attr_reader :tasks
     def initialize

@@ -1,6 +1,7 @@
 # Plans, Thoughts, Half-Baked Ideas, Etc. #
 
 ## TODO.next ##
+* **FUCKIN IMPORTANT** cleanup integration between output handling and new expectation system
 * test mode: run every metric once (sequentially) and exit
 * verbosity: be able to turn successful expectations on and off (globally? in text output handler?)
 * validate monitors attributes (format, presence)
@@ -12,14 +13,15 @@
 * log file load/search tool for ruby formatted logs -- a simple library to do that, plus irb wrapping
 
 ## TODO.sometime ##
+* conf.d/ system, load .rb files from it?
+* conf.d/ system, provide a shortcut for loading json or yaml files from it (for integration w/ cfg mgrs)
 * live reload
-* manpages
+* manpages: pandoc/rtfm (ruby)
 * retry logic on failed expectations (i.e. try again every 1m 5 times after a failure)
 * look @ nagios and collectd docco for typical check types, start a std lib
 of metric collectors
 * A no-op mode may be possible by "stubbing" #result...
-* state transitions: have a warning state (maybe?) if over threshold, becomes alert if lasts too long;
-  recovery from alert->warning->normal
+* states and state transitions: i.e., there is a warning and a critical state
 * instantiate metrics from data over the wire so I can hit an API on the server and add/remove/update a check on clients
  
 ## STDLIB stuff ##
@@ -32,15 +34,14 @@ Should focus on full stack testing (i.e., send an email and check it to test ema
 * disk i/o
 * REST (HTTP verbs)
 * full-stack integration monitoring
-* email reading (for verification emails)
+* email reading (e.g., for verification emails)
 
 ## Server Arch ##
 The server should have these 3 parts or be 3 separate servers:
 
 1. 	Alert Server: 
    	manages sending notifications via twit, basecamp, email, etc. Should have some sort of
-   	DSL for managing what alerts get sent, etc. based on source, time of day,
-		whatever - erlectricity?
+   	DSL for managing what alerts get sent, etc. based on source, time of day, etc.
 2.	Trend Server: 
 		stores data from agents, allows queries of said data via API, shows pretty
 		graphs using js to browsers

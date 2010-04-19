@@ -7,11 +7,13 @@ module Critical
     module CLIOptionParser
       module ClassMethods
         def help_banner(banner_text=nil)
+          @help_banner ||= nil
           @help_banner = banner_text if banner_text
           @help_banner
         end
       
         def help_footer(footer_text=nil)
+          @help_footer ||= nil
           @help_footer = footer_text if footer_text
           @help_footer
         end

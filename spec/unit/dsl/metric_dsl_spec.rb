@@ -10,6 +10,7 @@ describe DSL::MetricDSL do
   
   describe "defining new metrics" do
     before do
+      original_verbose = $VERBOSE
       $VERBOSE = nil # yes, I know I'm redefining constant blah blah blah
       begin
         value_in_closure = nil
@@ -21,7 +22,7 @@ describe DSL::MetricDSL do
         end
         @value_in_closure = value_in_closure
       ensure
-        $VERBOSE = true # but warnings are good in general
+        $VERBOSE = original_verbose # but warnings are good in general
       end
     end
     

@@ -59,6 +59,7 @@ Monitor(:unix_box) do
         # implemented:
         root_partition.percentage.is      less_than(85)
         # not implemented:
+        root_partition.critical {percentage < 85}
         ###root_partition.percentage.trend("root partition", opts={})
       end
     end
