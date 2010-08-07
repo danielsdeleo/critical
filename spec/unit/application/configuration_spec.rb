@@ -100,7 +100,9 @@ describe Application::Configuration do
       @config.config_file.should == "/path/to/config/file"
     end
     
-    it "sets the logfile location"
+    it "sets the logfile location" do
+      pending "TODO"
+    end
     
     it "sets the log level" do
       @config.stub!(:argv).and_return(%w{-l FATAL})

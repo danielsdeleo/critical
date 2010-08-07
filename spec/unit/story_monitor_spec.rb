@@ -68,7 +68,9 @@ describe StoryMonitor do
     story_monitor.should have(3).steps
   end
 
-  it "is scheduled as a whole story"
+  it "is scheduled as a whole story" do
+    pending "TODO"
+  end
 
   it "provides a data stash where data can be stored between steps" do
     @story_monitor.story_data.should == {}

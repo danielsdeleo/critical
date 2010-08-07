@@ -67,10 +67,10 @@ describe MonitorCollection do
       @collection << @foo_monitor << @bar_monitor << @baz_monitor
     end
     
-    it "yields the monitors via #each" do
+    it "yields the monitors via #each (order preserved on ruby 1.9 only)" do
       monitors = []
       @collection.each { |monitor| monitors << monitor }
-      monitors.should == [@foo_monitor, @bar_monitor, @baz_monitor]
+      monitors.should include(@foo_monitor, @bar_monitor, @baz_monitor)
     end
     
     it "can be enumerated with other enumerable methods" do
