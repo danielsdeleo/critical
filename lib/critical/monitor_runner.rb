@@ -1,24 +1,34 @@
+require 'critical/loggable'
+require 'critical/process_manager'
+
 module Critical
   class MonitorRunner
     include Loggable
 
-    attr_reader :queue
-    def initialize(queue)
-      @queue = queue
+    include Subprocess
+
+    attr_reader :ipc
+
+    def initialize(ipc)
+      @ipc = ipc
     end
 
     def run
-      while monitor_name = queue.pop
-        if monitor = MonitorCollection.instance.find(monitor_name)
-          run_collection(monitor)
-        else
-          log.error "Could not find monitor named #{monitor_name} to run"
-        end
+      setup_ipc(@ipc)
+
+      each_message(@ipc) do |task|
+        # async: ack, then execute
+        task.ack
+        run_monitor(task.url)
       end
     end
 
-    def run_all
-      collection.each { |monitor| run_collection(monitor) }
+    def run_monitor(monitor_name)
+      if monitor = MonitorCollection.instance.find(monitor_name)
+        collect(monitor)
+      else
+        log.error "Could not find monitor named #{monitor_name} to run"
+      end
     end
 
     private
@@ -27,10 +37,10 @@ module Critical
        MonitorCollection.instance
     end
 
-    def run_collection(monitor)
+    def collect(monitor)
       log.debug { "Starting collection for #{monitor.fqn}"}
       monitor.collect(OutputHandler::Dispatcher.new)
-      log.debug { "Finished collection for #{monitor.fqn}"}
+      log.info { "Collected #{monitor.fqn}"}
     end
 
   end

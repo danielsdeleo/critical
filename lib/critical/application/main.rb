@@ -1,3 +1,10 @@
+require 'critical/protocol'
+require 'critical/application/daemon'
+require 'critical/application/configuration'
+require 'critical/file_loader'
+require 'critical/process_manager'
+require 'critical/monitor_runner'
+
 module Critical
   module Application
     class Main
@@ -8,24 +15,11 @@ module Critical
       def run
         configure
         log.debug {"Critical is starting up, current PID: #{Process.pid}"}
-        trap_signals
         load_sources
         validate_config
         daemonize! if daemonizing?
-        start_monitor_runner
-        start_scheduler
-      end
-      
-      def trap_signals
-        Kernel.trap("TERM") do
-          raise 'TODO: sensible signal handling'
-        end
-        Kernel.trap("INT") do
-          raise 'TODO: sensible signal handling'
-        end
-        Kernel.trap("HUP") do 
-          raise 'TODO: sensible signal handling'
-        end
+        spawn_workers
+        start_scheduler_loop
       end
       
       def configure
@@ -46,18 +40,33 @@ module Critical
         config.daemonize?
       end
       
-      def start_scheduler
-        scheduler.run
+      def spawn_workers
+        log.info { "starting workers" }
+        process_manager.start_ipc
+        process_manager.spawn_worker(3) do |ipc|
+          MonitorRunner.new(ipc).run
+        end
       end
-      
-      def start_monitor_runner
-        Thread.new do
-          MonitorRunner.new(scheduler.queue).run
+
+      def start_scheduler_loop
+        loop do
+          scheduler.each do |monitor|
+            process_manager.dispatch do |socket|
+              Protocol::Client.new(socket).publish_task(monitor)
+            end
+          end
+          break if process_manager.sleep(scheduler.time_until_next_task)
+          # TODO: not implemented :(
+          #process_manager.manage_workers
         end
       end
       
       def scheduler
         @scheduler ||= Scheduler::TaskList.new(monitor_collection.tasks)
+      end
+
+      def process_manager
+        ProcessManager.instance
       end
       
       private

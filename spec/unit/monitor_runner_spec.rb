@@ -6,19 +6,19 @@ describe MonitorRunner do
     @monitor = Critical::Monitor.new
     @monitor.fqn = "/appservers/process_count(unicorn)"
     MonitorCollection.instance.push(@monitor)
+
+    @ipc = ProcessManager::IPCData.new(nil, nil)
   end
 
-  it "takes a queue in the initializer" do
-    @queue = Queue.new
-    runner = MonitorRunner.new(@queue)
-    runner.queue.should equal(@queue)
+  it "holds a copy of its IPC instructions" do
+    runner = MonitorRunner.new(@ipc)
+    runner.ipc.should equal(@ipc)
   end
 
   it "looks up a monitor in the collection" do
-    @queue = ["/appservers/process_count(unicorn)"]
     @monitor.should_receive(:collect)
-    runner = MonitorRunner.new(@queue)
-    runner.run
+    runner = MonitorRunner.new(@ipc)
+    runner.run_monitor("/appservers/process_count(unicorn)")
   end
 
 end

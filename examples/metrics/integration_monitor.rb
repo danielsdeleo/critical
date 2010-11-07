@@ -12,6 +12,7 @@ Metric(:browser) do
   end
 end
 
+__END__
 
 # Namespacing: should be namespaceable via Monitor() like everything else;
 # should show up as $namespace/story("story title")

@@ -22,9 +22,9 @@ end
 
 Monitor(:memory) do
   
-  freemem do |memory|
+  freemem do
     #record memory.mb_free #or some such API...
-    memory.mb_free.is gte(1512)
+    critical { mb_free.should be > 1512}
   end
   
 end

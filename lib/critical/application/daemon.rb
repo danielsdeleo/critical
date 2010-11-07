@@ -40,7 +40,7 @@ module Critical
       end
 
       # Wait a short time, then exit. The reason for this is if you run the app
-      # via ssh run_application there can be a race between exiting and setsid.
+      # via `ssh COMMAND`  there can be a race between exiting and setsid.
       # If you lose this race the OS will kill you before init can adopt you.
       # It is rare that this happens, but no harm in being paranoid about it.
       def delayed_exit

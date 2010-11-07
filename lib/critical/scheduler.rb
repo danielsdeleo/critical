@@ -3,7 +3,14 @@ require 'thread'
 module Critical
   class Scheduler
     class Task
-      attr_reader :next_run, :interval, :block, :monitor
+
+      attr_reader :next_run
+
+      attr_reader :interval
+
+      attr_reader :block
+
+      attr_reader :monitor
       
       def initialize(qualified_monitor_name, interval, next_run=nil)
         @monitor, @interval =  qualified_monitor_name, interval
@@ -18,42 +25,36 @@ module Critical
     
     class TaskList
       include Loggable
-      
+      include Enumerable
+
       def self.quantum
         5
       end
-      
-      attr_reader :tasks, :queue
-      
+
+      attr_reader :tasks
+
       def initialize(*schedule_tasks)
-        @queue = Queue.new
         @tasks = Hash.new { |hsh, key| hsh[key] = [] }
         schedule_tasks.flatten.each { |t| schedule(t) }
-      end
-      
-      def run
-        log.debug { "starting scheduler loop" }
-        loop do
-          run_tasks
-          sleep_until_next_run
-        end
       end
       
       def schedule(task)
         @tasks[quantize(task.next_run)] << task
       end
       
-      def sleep_until_next_run
+      def time_until_next_task
         time_to_sleep = next_run - current_time
         time_to_sleep = 0 if time_to_sleep < 0
-        sleep(time_to_sleep)
+        time_to_sleep
       end
       
-      def run_tasks
+      # Yields each monitor currently scheduled to be exeuted
+      def each
         buckets = task_buckets_to_run.map { |bucket| tasks.delete(bucket) }.compact
         buckets.each do |tasks_in_bucket|
           tasks_in_bucket.each do |task|
-            run_task(task)
+            yield task.monitor
+            reschedule_task(task)
           end
         end
       end
@@ -69,8 +70,7 @@ module Critical
         @tasks.keys.select { |t| t <= now }.sort
       end
       
-      def run_task(task)
-        queue.push task.monitor
+      def reschedule_task(task)
         task.succ!
         schedule task
       end

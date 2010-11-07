@@ -1,16 +1,26 @@
 = Critical
-This software is srsly alpha. Some assembly required.
+Monitoring should be a layer in the stack, not an application.
 
-== Manifesto
+= Installing
+  gem install rspec
+  git clone git://github.com/danielsdeleo/critical.git
+
+= Configuring and Running
+See bin/critical --help and the examples directory
+
+= Manifesto
 Critical is my take on network/infrastructure monitoring. Here are the big ideas:
 * Infrastructure as code: The monitoring system should be an internal DSL so it can natively interact with any part of your infrastructure you can find a library for. You should also be able to productively alter its guts if you want/need to. This is a monitoring system for Ops people who write code and coders who do ops.
 * Declarative: The configuration should have a feel of "my system should be like +this+" and not, "do this thing, do that thing, then email me if the result isn't 5."
-* API driven: This is meaningless at the moment, since there's no server yet. When there is a server, it should be possible to hack together a script with rest-client or curl to update the configuration. No clickety-clickety unless you like doing things that way. Updating a config file should also be a viable option which should peacefully co-exist with the API.
-* Graphing for the modern era: Also meaningless since there's no data collection or storage yet. But that data storage will not be RRD. And there will be pretty graphs, not ugly ones.
-* Scale down as well as up: It should be possible to get meaningful value running one program on one host so you can learn if Critical is the right monitoring solution for you without setting up 3 or 4 daemons and configuring them to talk to each other. Then you can scale up to a multi-tier system if you want/need to.
 * Licensing: "Do what thou wilt shall be the whole of the law," except for patent trolls, etc. So, Apache 2.0 it is.
 
-== Status
-You can define metrics and monitors (monitors are instances of metrics). The scheduler works, and there's a runner to execute collections. The runner that exists now is a temporary implementation that only runs one metric at a time. Rough edges throughout. 
+== If/When I write a Server for It:
+* API driven: When there is a server, it should be possible to hack together a script with rest-client or curl to update the configuration. No clickety-clickety unless you like doing things that way. Updating a config file should also be a viable option which should peacefully co-exist with the API.
+* Graphing for the modern era: Data storage will not be RRD. And there will be pretty graphs, not ugly ones.
+* Scale down as well as up: It should be possible to get meaningful value running one program on one host so you can learn if Critical is the right monitoring solution for you without setting up 3 or 4 daemons and configuring them to talk to each other. Then you can scale up to a multi-tier system if you want/need to.
 
-Most notably, there is no server or any network-aware configuration mechanism.
+== Project Status
+The client runs and monitors the system, but you'll have to get your hands dirty and write the code if you want it to actually alert you if something goes wrong. A server to collect metrics and dispatch alerts is planned but not implemented at all. 
+
+= License and Copyright
+Distributed under the terms of the Apache 2.0 license. &copy; 2010 Daniel DeLeo

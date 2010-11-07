@@ -4,6 +4,8 @@ module Critical
 end
 
 require 'critical/loggable'
+require 'critical/protocol'
+require 'critical/process_manager'
 require 'critical/scheduler'
 require 'critical/output_handler'
 require 'critical/dsl'

@@ -56,8 +56,8 @@ describe Scheduler::TaskList do
   it "it runs a task by placing its monitor name on the queue and rescheduling the task" do
     task = Scheduler::Task.new('/cpu/load_avg(5)', 75)
     task.next_run.should == 1268452029
-    @list.send :run_task, task
-    @list.queue.pop.should == "/cpu/load_avg(5)"
+    @list.schedule(task)
+    @list.collect {|t| t }.should == ["/cpu/load_avg(5)"]
     @list.tasks.should == {1268452100 => [task]}
     task.next_run.should == 1268452104
   end
@@ -72,12 +72,10 @@ describe Scheduler::TaskList do
       @list.schedule(@third_task)
     end
     
-    it "sleeps until the next scheduled task" do
-      @list.should_receive(:sleep).with(0)
-      @list.sleep_until_next_run
+    it "calculates the time until the next scheduled task" do
+      @list.time_until_next_task.should == 0
       @list.tasks.delete(1268452025)
-      @list.should_receive(:sleep).with(6)
-      @list.sleep_until_next_run
+      @list.time_until_next_task.should == 6
     end
 
     it "lists all of the time buckets that should be run" do
@@ -86,16 +84,20 @@ describe Scheduler::TaskList do
       @list.send(:task_buckets_to_run).should == [1268452025, 1268452035]
     end
     
-    it "runs all of the tasks that are due" do
-      @list.queue.length.should == 0
+    it "runs all of the tasks that are due (including overdue tasks)" do
+      # first task is due immediately
+      @list.collect {|t| t }.should == ['/cpu/load_avg(15)']
+      # nothing to do after running all due tasks
+      @list.collect {|t| t }.should be_empty
+
       @later_time = @time + 15
       Time.stub!(:new).and_return(@later_time)
       
-      @list.run_tasks
-      
       @list.next_run.should == 1268452035
-      @list.queue.pop.should == '/cpu/load_avg(15)'
-      @list.queue.pop.should == '/disks/df(/)'
+
+      @list.collect {|t| t }.should == ['/disks/df(/)','/cpu/load_avg(15)']
+
+      @list.next_run.should == 1268452045
     end
   end
   

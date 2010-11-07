@@ -13,23 +13,17 @@ describe Application::Main do
     $loaded_in_context_of.should_not be_nil
   end
   
-  it "sets traps for sigterm, sigint, and HUP" do
-    Kernel.should_receive(:trap).with("HUP")
-    Kernel.should_receive(:trap).with("INT")
-    Kernel.should_receive(:trap).with("TERM")
-    @main.trap_signals
-  end
-  
   it "daemonizes the application" do
     Application::Daemon.should_receive(:daemonize)
     @main.daemonize!
   end
   
   it "runs the scheduler" do
-    scheduler = mock("Scheduler::TaskList")
+    scheduler = mock("Scheduler::TaskList", :time_until_next_task => 5)
+    scheduler.should_receive(:each)
     @main.stub!(:scheduler).and_return(scheduler)
-    scheduler.should_receive(:run)
-    @main.start_scheduler
+    ProcessManager.instance.should_receive(:sleep).and_return(true)
+    @main.start_scheduler_loop
   end
   
 end

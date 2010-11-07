@@ -56,10 +56,9 @@ Monitor(:unix_box) do
       # If you hadn't passed a block variable to +Monitor+ above, you could
       # just write <tt>df("/")</tt> instead of <tt>disks.df("/")</tt>
       disks.df("/") do |root_partition|
+        root_partition.warning  { root_partition.percentage <= 75 }
         # implemented:
-        root_partition.percentage.is      less_than(85)
-        # not implemented:
-        root_partition.critical {percentage < 85}
+        root_partition.critical {root_partition.percentage <= 85 }
         ###root_partition.percentage.trend("root partition", opts={})
       end
     end
