@@ -1,10 +1,9 @@
-# Plans, Thoughts, Half-Baked Ideas, Etc. #
+# TODOs and Maybes #
 
 ## BE AWARE ##
 * Visibility into running process
   * how deep is the work queue?
   * how long do tasks take to get through?
-* Operator overrides - submit a task to the queue manually
 
 ## TODO NOW ##
 * message sending needs to IO.select(nil,[writers],nil, timeout) so it doesn't
@@ -14,7 +13,9 @@
 * cleanup integration between output handling and new expectation system
 
 ## TODO ##
-* test mode: run individual metrics and exit
+* CLI client to submit a task to the queue manually
+* figure out stable protocol so other programs/libs/langs can submit jobs to the queue
+* test/run once mode: run individual metrics sequentially in single process and exit
 * retry logic on failed expectations (i.e. try again every 1m 5 times after a failure)
   probably a second socket to "write back" to the scheduler with status updates
 * debug method within monitors, take a block and pp the output when verbosity is on for collection
@@ -22,12 +23,12 @@
 * log file load/search tool for ruby formatted logs -- a simple library to do that, plus irb wrapping
 * live code reloading
 * manpages (ronn)
-* start a std lib of metric collectors
+* start a stdlib of metric collectors (see below)
 * instantiate metrics from data over the wire so I can hit an API on the server and add/remove/update a check on clients
 
 ## Maybe ##
 * conf.d/ system, load .rb files from it?
-* conf.d/ system, provide a shortcut for loading json or yaml files from it (for integration w/ cfg mgrs)
+* json or yaml files support (for integration w/ cfg mgrs)
 * no-op mode?
  
 ## STDLIB ##

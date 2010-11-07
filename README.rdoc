@@ -23,4 +23,4 @@ Critical is my take on network/infrastructure monitoring. Here are the big ideas
 The client runs and monitors the system, but you'll have to get your hands dirty and write the code if you want it to actually alert you if something goes wrong. A server to collect metrics and dispatch alerts is planned but not implemented at all. 
 
 = License and Copyright
-Distributed under the terms of the Apache 2.0 license. &copy; 2010 Daniel DeLeo
+Distributed under the terms of the Apache 2.0 license. (c) 2010 Daniel DeLeo
