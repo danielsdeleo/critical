@@ -10,14 +10,9 @@ See bin/critical --help and the examples directory
 
 = Manifesto
 Critical is my take on network/infrastructure monitoring. Here are the big ideas:
-* Infrastructure as code: The monitoring system should be an internal DSL so it can natively interact with any part of your infrastructure you can find a library for. You should also be able to productively alter its guts if you want/need to. This is a monitoring system for Ops people who write code and coders who do ops.
-* Declarative: The configuration should have a feel of "my system should be like +this+" and not, "do this thing, do that thing, then email me if the result isn't 5."
+* Infrastructure as code: The monitoring system should be an internal DSL so it can natively interact with any part of your infrastructure you can find or write a library for. You should also be able to productively alter its guts if you need to. This is a monitoring system for ops people who write code and coders who do ops.
+* Declarative: Declare what the state of your system is supposed to be.
 * Licensing: "Do what thou wilt shall be the whole of the law," except for patent trolls, etc. So, Apache 2.0 it is.
-
-== If/When I write a Server for It:
-* API driven: When there is a server, it should be possible to hack together a script with rest-client or curl to update the configuration. No clickety-clickety unless you like doing things that way. Updating a config file should also be a viable option which should peacefully co-exist with the API.
-* Graphing for the modern era: Data storage will not be RRD. And there will be pretty graphs, not ugly ones.
-* Scale down as well as up: It should be possible to get meaningful value running one program on one host so you can learn if Critical is the right monitoring solution for you without setting up 3 or 4 daemons and configuring them to talk to each other. Then you can scale up to a multi-tier system if you want/need to.
 
 == Project Status
 The client runs and monitors the system, but you'll have to get your hands dirty and write the code if you want it to actually alert you if something goes wrong. A server to collect metrics and dispatch alerts is planned but not implemented at all. 
