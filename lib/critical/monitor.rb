@@ -3,6 +3,8 @@ module Critical
   end
 
   class Monitor
+    include RSpec::Matchers
+
     STATUSES = {:ok => 0, :warning => 1, :critical => 2}
 
     class << self
@@ -55,10 +57,6 @@ module Critical
       monitored_attributes << attribute
       attr_accessor attribute.to_sym
       define_default_attribute(attribute) unless default_attr_defined?
-    end
-
-    def self.enable_rspec
-      include Spec::Matchers
     end
 
     attr_accessor :fqn
