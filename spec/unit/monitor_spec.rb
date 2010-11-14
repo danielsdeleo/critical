@@ -324,14 +324,15 @@ describe Monitor do
         @metric_instance.metric_status.should == :critical
       end
 
-      it "optionally supports rspec for making assertions about values" do
+      it "supports rspec for making assertions about values" do
         value = nil
-        @metric_class.enable_rspec
         @metric_instance = @metric_class.new { expect {value.should be_nil } }
         @metric_instance.collect(@output_handler)
         @metric_instance.metric_status.should == :ok
 
-        @metric_instance = @metric_class.new { expect { value.should_not be_nil} }
+        value = nil
+        @metric_instance = @metric_class.new {expect {value.should_not be_nil}}
+
         @metric_instance.collect(@output_handler)
         @metric_instance.metric_status.should == :critical
       end

@@ -10,11 +10,9 @@ module Critical
     class Main
       include Loggable
       
-      attr_reader :scheduler_thread
-      
       def run
         configure
-        log.debug {"Critical is starting up, current PID: #{Process.pid}"}
+        log.info {"Critical is starting up, current PID: #{Process.pid}"}
         load_sources
         validate_config
         daemonize! if daemonizing?

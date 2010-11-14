@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 module TestHarness
-  extend Spec::Matchers
+  extend RSpec::Matchers
 
   class Worker
     include Critical::Subprocess
