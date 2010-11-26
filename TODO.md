@@ -2,10 +2,9 @@
 
 ## BE AWARE ##
 * Visibility into running process
-  * how deep is the work queue?
-  * how long do tasks take to get through?
 
 ## TODO NOW ##
+* Implement signal queue in process manager
 * message sending needs to IO.select(nil,[writers],nil, timeout) so it doesn't
   deadlock if all the workers are dead/busy
 * retries after respawning workers in the above scenario
@@ -19,17 +18,16 @@
 * retry logic on failed expectations (i.e. try again every 1m 5 times after a failure)
   probably a second socket to "write back" to the scheduler with status updates
 * debug method within monitors, take a block and pp the output when verbosity is on for collection
-* Implement/finish "story mode"
-* log file load/search tool for ruby formatted logs -- a simple library to do that, plus irb wrapping
+* Finish "story mode"
 * live code reloading
 * manpages (ronn)
-* start a stdlib of metric collectors (see below)
 * instantiate metrics from data over the wire so I can hit an API on the server and add/remove/update a check on clients
 
 ## Maybe ##
+* log file load/search tool for ruby formatted logs -- a simple library to do that, plus irb wrapping
 * conf.d/ system, load .rb files from it?
 * json or yaml files support (for integration w/ cfg mgrs)
-* no-op mode?
+* privilege separation, run some workers as root, others not.
  
 ## STDLIB ##
 Should focus on full stack testing where sensible:
