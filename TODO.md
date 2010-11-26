@@ -21,7 +21,7 @@
 * Finish "story mode"
 * live code reloading
 * manpages (ronn)
-* instantiate metrics from data over the wire so I can hit an API on the server and add/remove/update a check on clients
+* instantiate metrics from serializable data
 
 ## Maybe ##
 * log file load/search tool for ruby formatted logs -- a simple library to do that, plus irb wrapping
