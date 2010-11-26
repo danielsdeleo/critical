@@ -3,6 +3,12 @@ module Critical
   end
 end
 
+# External Deps #
+
+# gem install rspec-expectations
+require 'rspec/matchers'
+
+require 'critical/heartbeat_file'
 require 'critical/loggable'
 require 'critical/protocol'
 require 'critical/process_manager'

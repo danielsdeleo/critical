@@ -110,19 +110,12 @@ module Critical
       "/tmp/critical-sock"
     end
 
-    def generate_heartbeat_file
-      # TODO: stdlib tempfile is pretty lame, write a better one.
-      heartbeat_file = Tempfile.new("#{self.class.name}-heartbeat")
-      heartbeat_file.unlink
-      heartbeat_file
-    end
-
     # Spawn a worker process, calling the supplied block inside the forked process.
     # The caller is responsible for calling reset_in_child after forking.
     def spawn_worker(worker_count=1, &block)
       start_ipc unless ipc_started?
       child_pids = (1..worker_count).map do |i|
-        ipc_data = IPCData.new(@server, generate_heartbeat_file, i)
+        ipc_data = IPCData.new(@server, HeartbeatFile.new, i)
         child_pid = fork do
           block.call(ipc_data)
         end
@@ -185,10 +178,9 @@ module Critical
       @children.each_key { |p| kill_and_reap(p, :TERM) }
     end
 
-    # Has the heartbeat_file been updated within timeout_time seconds of now?
+    # Has the worker updated the heartbeat within timeout_time seconds of now?
     def timed_out?(worker_data)
-      stat = worker_data.heartbeat_file.stat
-      (Time.new - stat.ctime) > timeout_time
+      worker_data.heartbeat_file.time_since_heartbeat > timeout_time
     end
 
     # The maximum amount of time a worker can go without updating its heartbeat
@@ -239,12 +231,12 @@ module Critical
 
       loop do
 
-        heartbeat(ipc)
+        ipc.heartbeat_file.alive!
         
         # accept connections from sockets with pending connections
         ready_sockets.each do |socket|
           accept_connections(socket) { |dequeued_task| yield dequeued_task }
-          heartbeat(ipc)
+          ipc.heartbeat_file.alive!
         end
 
         unless Process.ppid == expected_ppid
@@ -252,7 +244,7 @@ module Critical
           break
         end
 
-        heartbeat(ipc)
+        ipc.heartbeat_file.alive!
 
         begin
           ready_list = IO.select(all_sockets, nil, nil, READ_WAIT_TIME) or redo
@@ -281,15 +273,6 @@ module Critical
     rescue Errno::ECONNABORTED
       log.debug { "Connection #{reader.inspect} aborted" }
       nil
-    end
-
-    # Signals to the parent that the child is alive. Uses the unicorn method
-    # of fchmod(2)-ing an unlinked tempfile.
-    def heartbeat(ipc)
-      @alternator ||= 0
-      @alternator = 1 - @alternator
-      #log.debug { "updating heartbeat (alternator=#{@alternator})" }
-      ipc.heartbeat_file.chmod(@alternator)
     end
 
     def socket_name(socket)

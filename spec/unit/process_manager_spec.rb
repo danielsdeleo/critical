@@ -56,19 +56,13 @@ describe ProcessManager do
     @manager.server.inspect.should match(%r|#{Regexp.escape("/tmp/critical-sock")}|)
   end
 
-  it "creates and unlinks a tempfile for heartbeating" do
-    tempfile = @manager.generate_heartbeat_file
-    tempfile.should be_an_instance_of(Tempfile)
-    tempfile.path.should be_nil # i.e., it's unlinked so you can't find it.
-  end
-
   it "forks a worker process and gives it a care package" do
     parent_pid = Process.pid
     @manager.start_ipc
     pid = @manager.spawn_worker do |care_package|
       begin
         care_package.socket.inspect.should match(%r[#{Regexp.escape("/tmp/critical-sock")}])
-        care_package.heartbeat_file.should be_an_instance_of(Tempfile)
+        care_package.heartbeat_file.should be_an_instance_of(HeartbeatFile)
         exit!(0)
       rescue Exception => e
         puts "#{e.class.name}: #{e.message}"
@@ -87,7 +81,7 @@ describe ProcessManager do
     @manager.children.should have_key(pid)
     care_package = @manager.children[pid]
     care_package.socket.inspect.should match(%r[#{Regexp.escape("/tmp/critical-sock")}])
-    care_package.heartbeat_file.should be_an_instance_of(Tempfile)
+    care_package.heartbeat_file.should be_an_instance_of(HeartbeatFile)
   end
 
   it "kills and reaps all children" do
@@ -147,7 +141,7 @@ describe ProcessManager do
       child_process_spec = @manager.children[stuck_worker]
 
       too_late_for_stuck_worker = Time.now + @manager.timeout_time + 1
-      Time.stub!(:new).and_return(too_late_for_stuck_worker)
+      Time.stub!(:now).and_return(too_late_for_stuck_worker)
 
       @manager.timed_out?(child_process_spec).should be_true
 
@@ -204,7 +198,7 @@ describe Subprocess do
   before do
     @child = TestHarness::Worker.new
     @socket_file = Tempfile.new("critical-rspec-socket").path
-    @heartbeat_file = Tempfile.new("critical-rspec-heartbeat")
+    @heartbeat_file = HeartbeatFile.new
     FileUtils.rm_f(@socket_file)
     @socket = UNIXServer.new(@socket_file)
     @socket.listen(2)
@@ -213,7 +207,7 @@ describe Subprocess do
 
   after do
     FileUtils.rm_f(@socket_file)
-    FileUtils.rm_f(@heartbeat_file)
+    @heartbeat_file.close
   end
 
   it "sets the process name to 'critical : worker[NUMBER]'" do
@@ -239,7 +233,7 @@ describe Subprocess do
     original_ctime = @heartbeat_file.stat.ctime
     sleep(1.1) # ctime resolution is 1s on my system
     TestHarness.test_in_subprocess do
-      Critical.config.log_level = :debug
+      Critical.config.log_level = :info
       @child.setup_ipc(@ipc)
       @child.each_message(@ipc) { |task| task.message.should == ".\n"; exit!(0) }
     end
