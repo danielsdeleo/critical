@@ -14,6 +14,7 @@ describe Loggable do
     @logist = TestHarness::LoggingImplementor.new
     @logist.log.stub!(:io_out).and_return(@io)
     @logist.log.reset!
+    @logist.log.level = :debug
   end
   
   it "sets the log level with a symbol" do
