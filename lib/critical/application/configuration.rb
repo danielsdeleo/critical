@@ -40,6 +40,7 @@ module Critical
       def reset!
         @source_files   = []
         @daemonize      = nil
+        @continuous     = nil
         @eval_line_no   = nil
       end
       
@@ -95,7 +96,16 @@ module Critical
       def daemonize?
         @daemonize || false
       end
-      
+
+      option "Continuously monitor the system", :short => :C
+      def continuous
+        @continuous = true
+      end
+
+      def continuous?
+        @continuous || false
+      end
+
       option "A sting of ruby code to evaluate", :short => :e, :arg => :code
       def eval(ruby_code)
         @eval_line_no ||= 0
