@@ -81,7 +81,7 @@ module Critical
       def reset!
         @logger = ::Logger.new(io_out)
         @logger.formatter = Formatters::Ruby.new
-        @logger.level = level_to_const(Critical.config.log_level || :debug)
+        @logger.level = level_to_const(Critical.config.log_level || :info)
       end
       
       def io_out
