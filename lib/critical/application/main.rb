@@ -60,7 +60,7 @@ module Critical
       end
       
       def scheduler
-        @scheduler ||= Scheduler::TaskList.new(monitor_collection.tasks)
+        @scheduler ||= Scheduler.new(monitor_collection.tasks)
       end
 
       def process_manager

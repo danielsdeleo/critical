@@ -25,22 +25,22 @@ describe Scheduler::Task do
   end
 end
 
-describe Scheduler::TaskList do
+describe Scheduler do
   before do
     @time = Time.at(1268452029)
     Time.stub!(:new).and_return(@time)
-    @list = Scheduler::TaskList.new
+    @list = Scheduler.new
   end
   
   it "has a setting for time quantum" do
-    Scheduler::TaskList.quantum.should == 5
+    Scheduler.quantum.should == 5
   end
   
   it "takes a list of tasks in it's initializer" do
     first_task   = Scheduler::Task.new('/cpu/load_avg(15)', 10)
     second_task  = Scheduler::Task.new("/disks/df(/)",10, @time.to_i + 10)
     third_task   = Scheduler::Task.new("/web/get(http://localhost/)",10, @time.to_i + 20)
-    list = Scheduler::TaskList.new(first_task, second_task, third_task)
+    list = Scheduler.new(first_task, second_task, third_task)
     
     list.tasks.values.flatten.should include(first_task)
     list.tasks.values.flatten.should include(second_task)

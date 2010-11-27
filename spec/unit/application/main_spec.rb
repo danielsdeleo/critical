@@ -19,7 +19,7 @@ describe Application::Main do
   end
   
   it "runs the scheduler" do
-    scheduler = mock("Scheduler::TaskList", :time_until_next_task => 5)
+    scheduler = mock("Scheduler", :time_until_next_task => 5)
     scheduler.should_receive(:each)
     @main.stub!(:scheduler).and_return(scheduler)
     ProcessManager.instance.should_receive(:sleep).and_return(true)
