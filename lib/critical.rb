@@ -6,6 +6,7 @@ end
 # External Deps #
 
 # gem install rspec-expectations
+require 'rspec/expectations'
 require 'rspec/matchers'
 
 require 'critical/heartbeat_file'
