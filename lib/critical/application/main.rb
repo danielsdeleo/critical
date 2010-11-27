@@ -6,18 +6,27 @@ require 'critical/process_manager'
 require 'critical/monitor_runner'
 
 module Critical
+
+  # Signals that should handled in the default way (process exit) in the workers
+  SIGNALS = [:QUIT, :INT, :TERM, :USR1, :USR2, :HUP ]
+
   module Application
     class Main
       include Loggable
-      
+
+      ACTION_QUEUE = []
+      SELF_PIPE = []
+
       def run
         configure
         log.info {"Critical is starting up, current PID: #{Process.pid}"}
         load_sources
         validate_config
         daemonize! if daemonizing?
+        init_self_pipe
+        setup_signal_handling
         spawn_workers
-        start_scheduler_loop
+        run_main_loop
       end
       
       def configure
@@ -37,6 +46,16 @@ module Critical
       def daemonizing?
         config.daemonize?
       end
+
+      def init_self_pipe
+        SELF_PIPE.replace(IO.pipe)
+      end
+
+      def setup_signal_handling
+        SIGNALS.each do |signal|
+          trap(signal) { ACTION_QUEUE.unshift(signal); awaken}
+        end
+      end
       
       def spawn_workers
         log.info { "starting workers" }
@@ -46,19 +65,57 @@ module Critical
         end
       end
 
-      def start_scheduler_loop
+      def run_main_loop
+        # ACTION_QUEUE contains the in-order list of Scheduler::Task items to
+        # run and any signals received
         loop do
-          scheduler.each do |monitor|
-            process_manager.dispatch do |socket|
-              Protocol::Client.new(socket).publish_task(monitor)
-            end
+          case next_action = ACTION_QUEUE.shift
+          when Scheduler::Task
+            run_monitor_task_for(next_action)
+          when :INT, :USR1, :USR2, :HUP
+            log.info { "Shutting down immediately on #{next_action} signal" }
+            process_manager.killall(false)
+            exit(1)
+          when :QUIT, :TERM
+            log.info { "Graceful shutdown on #{next_action} signal"}
+            process_manager.killall(true)
+            break
+          when nil
+            sleep_time = scheduler.time_until_next_task
+            log.debug { "sleeping #{sleep_time} seconds until next tasks are due" }
+            sleep(sleep_time)
+            enqueue_monitor_tasks
+            process_manager.manage_workers
+          else
+            log.error { "Unknown action in the action queue #{next_action.inspect}" }
           end
-          break if process_manager.sleep(scheduler.time_until_next_task)
-          # TODO: not implemented :(
-          #process_manager.manage_workers
         end
       end
-      
+
+      # Sleep by selecting on a pipe. If a signal is recieved, the pipe will be
+      # written to, waking us from the sleep.
+      def sleep(time)
+        SELF_PIPE[0].read_nonblock(1024) if IO.select([SELF_PIPE[0]], nil, nil, time)
+      rescue Errno::EAGAIN
+        true
+      end
+
+      def awaken
+        SELF_PIPE[1].putc("!")
+      end
+
+      def enqueue_monitor_tasks
+        scheduler.each do |task|
+          ACTION_QUEUE.push(task)
+        end
+      end
+
+      def run_monitor_task_for(task)
+        process_manager.dispatch do |socket|
+          Protocol::Client.new(socket).publish_task(task.monitor)
+        end
+      end
+
       def scheduler
         @scheduler ||= Scheduler.new(monitor_collection.tasks)
       end

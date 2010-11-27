@@ -4,9 +4,6 @@ require 'singleton'
 
 module Critical
 
-  # Signals that should handled in the default way (process exit) in the workers
-  SIGNALS = [:QUIT, :INT, :TERM, :USR1, :USR2, :HUP ]
-
   # == Critical::IPCData
   # When creating a new child process, send them off with a care package
   # containing the parent process id, socket they should accept connections
@@ -45,9 +42,6 @@ module Critical
   class ProcessManager
     include Loggable
     include Singleton
-
-    SELF_PIPE = []
-    CAUGHT_SIGNALS = []
 
     # After calling start_ipc this contains a UNIXServer that can be shared
     # by the workers
@@ -90,16 +84,6 @@ module Critical
     def start_ipc
       File.unlink(socket_file) if File.exist?(socket_file)
       @server = UNIXServer.open(socket_file)
-
-      SELF_PIPE.replace(IO.pipe)
-
-      # TODO: actually do elegant things with some signals.
-      SIGNALS.each do |signal|
-        trap(signal) do
-          log.info { "exiting on signal #{signal}" }
-          stop_workers_and_exit
-        end
-      end
     end
 
     def ipc_started?
@@ -151,18 +135,6 @@ module Critical
       end
     end
 
-    # Sleep by selecting on a pipe. If a signal is recieved, the pipe will be
-    # written to, waking us from the sleep.
-    # If a signal requesting a clean exit was caught, returns true, otherwise
-    # false.
-    def sleep(time)
-      if IO.select([SELF_PIPE[0]], nil, nil, time)
-        #handle signals...
-      else
-        false
-      end
-    end
-
     def stop_workers_and_exit
       killall
       exit(1)
@@ -174,7 +146,7 @@ module Critical
     end
 
     # Kills and reaps all known child processes. Used in the test harness
-    def killall
+    def killall(graceful=false)
       @children.each_key { |p| kill_and_reap(p, :TERM) }
     end
 

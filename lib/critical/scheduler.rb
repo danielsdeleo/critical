@@ -52,7 +52,7 @@ module Critical
       buckets = task_buckets_to_run.map { |bucket| tasks.delete(bucket) }.compact
       buckets.each do |tasks_in_bucket|
         tasks_in_bucket.each do |task|
-          yield task.monitor
+          yield task
           reschedule_task(task)
         end
       end

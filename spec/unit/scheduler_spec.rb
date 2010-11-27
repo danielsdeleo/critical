@@ -57,7 +57,7 @@ describe Scheduler do
     task = Scheduler::Task.new('/cpu/load_avg(5)', 75)
     task.next_run.should == 1268452029
     @list.schedule(task)
-    @list.collect {|t| t }.should == ["/cpu/load_avg(5)"]
+    @list.collect {|t| t }.should == [task]
     @list.tasks.should == {1268452100 => [task]}
     task.next_run.should == 1268452104
   end
@@ -86,7 +86,7 @@ describe Scheduler do
     
     it "runs all of the tasks that are due (including overdue tasks)" do
       # first task is due immediately
-      @list.collect {|t| t }.should == ['/cpu/load_avg(15)']
+      @list.collect {|t| t }.should == [@first_task]
       # nothing to do after running all due tasks
       @list.collect {|t| t }.should be_empty
 
@@ -95,7 +95,7 @@ describe Scheduler do
       
       @list.next_run.should == 1268452035
 
-      @list.collect {|t| t }.should == ['/disks/df(/)','/cpu/load_avg(15)']
+      @list.collect {|t| t }.should == [@second_task,@first_task]
 
       @list.next_run.should == 1268452045
     end
