@@ -88,10 +88,20 @@ describe Application::Configuration do
       @config.stub!(:argv).and_return([])
       @config.parse_opts
       @config.daemonize?.should be_false
-      
+
       @config.stub!(:argv).and_return(%w{-D})
       @config.parse_opts
       @config.daemonize?.should be_true
+    end
+
+    it "specifies if the application should run continuously" do
+      @config.stub!(:argv).and_return([])
+      @config.parse_opts
+      @config.continuous?.should be_false
+
+      @config.stub!(:argv).and_return(%w{-C})
+      @config.parse_opts
+      @config.continuous?.should be_true
     end
     
     it "sets the config file location" do
