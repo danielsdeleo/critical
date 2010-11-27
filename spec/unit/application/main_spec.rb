@@ -17,13 +17,34 @@ describe Application::Main do
     Application::Daemon.should_receive(:daemonize)
     @main.daemonize!
   end
-  
+
+  it "selects on its self_pipe with a given timeout" do
+    IO.should_receive(:select).with([an_instance_of(IO)], nil,nil , 10)
+    @main.init_self_pipe
+    @main.sleep(10)
+  end
+
+  it "wakes up from a sleep" do
+    start = Time.now
+    @main.init_self_pipe
+    @main.awaken
+    @main.sleep(10)
+    (Time.now - start).should be_close(0, 1)
+  end
+
   it "runs the scheduler" do
-    scheduler = mock("Scheduler::TaskList", :time_until_next_task => 5)
-    scheduler.should_receive(:each)
+    scheduler = mock("Scheduler", :time_until_next_task => 5)
     @main.stub!(:scheduler).and_return(scheduler)
-    ProcessManager.instance.should_receive(:sleep).and_return(true)
-    @main.start_scheduler_loop
+    @main.should_receive(:sleep).and_return(true)
+    Application::Main::ACTION_QUEUE << nil
+
+    scheduler.should_receive(:each)
+    @main.enqueue_monitor_tasks
+
+    Application::Main::ACTION_QUEUE << :QUIT
+
+    scheduler.should_receive(:each)
+    @main.run_main_loop
   end
   
 end

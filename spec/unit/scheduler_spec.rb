@@ -25,22 +25,22 @@ describe Scheduler::Task do
   end
 end
 
-describe Scheduler::TaskList do
+describe Scheduler do
   before do
     @time = Time.at(1268452029)
     Time.stub!(:new).and_return(@time)
-    @list = Scheduler::TaskList.new
+    @list = Scheduler.new
   end
   
   it "has a setting for time quantum" do
-    Scheduler::TaskList.quantum.should == 5
+    Scheduler.quantum.should == 5
   end
   
   it "takes a list of tasks in it's initializer" do
     first_task   = Scheduler::Task.new('/cpu/load_avg(15)', 10)
     second_task  = Scheduler::Task.new("/disks/df(/)",10, @time.to_i + 10)
     third_task   = Scheduler::Task.new("/web/get(http://localhost/)",10, @time.to_i + 20)
-    list = Scheduler::TaskList.new(first_task, second_task, third_task)
+    list = Scheduler.new(first_task, second_task, third_task)
     
     list.tasks.values.flatten.should include(first_task)
     list.tasks.values.flatten.should include(second_task)
@@ -57,7 +57,7 @@ describe Scheduler::TaskList do
     task = Scheduler::Task.new('/cpu/load_avg(5)', 75)
     task.next_run.should == 1268452029
     @list.schedule(task)
-    @list.collect {|t| t }.should == ["/cpu/load_avg(5)"]
+    @list.collect {|t| t }.should == [task]
     @list.tasks.should == {1268452100 => [task]}
     task.next_run.should == 1268452104
   end
@@ -86,7 +86,7 @@ describe Scheduler::TaskList do
     
     it "runs all of the tasks that are due (including overdue tasks)" do
       # first task is due immediately
-      @list.collect {|t| t }.should == ['/cpu/load_avg(15)']
+      @list.collect {|t| t }.should == [@first_task]
       # nothing to do after running all due tasks
       @list.collect {|t| t }.should be_empty
 
@@ -95,7 +95,7 @@ describe Scheduler::TaskList do
       
       @list.next_run.should == 1268452035
 
-      @list.collect {|t| t }.should == ['/disks/df(/)','/cpu/load_avg(15)']
+      @list.collect {|t| t }.should == [@second_task,@first_task]
 
       @list.next_run.should == 1268452045
     end

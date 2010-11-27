@@ -178,17 +178,32 @@ describe ProcessManager do
     end
   end
 
-  it "selects on its self_pipe with a given timeout" do
-    IO.should_receive(:select).with([an_instance_of(IO)], nil,nil , 10)
-    @manager.sleep(10)
+  it "sends a INT to children for an immediate shutdown" do
+    child_ipc_data = IPCData.new(nil, StringIO.new, nil)
+
+    child = fork do
+      Kernel.trap(:INT) { exit!(0) }
+      Kernel.trap(:TERM) { nil }
+      Kernel.trap(:QUIT) { nil }
+      sleep
+    end
+    @manager.children[child] = child_ipc_data
+    @manager.killall(true)
+    lambda {Process.waitpid2(child)}.should raise_error(Errno::ECHILD)
   end
 
-  it "sends a QUIT to children when it receives QUIT" do
-    pending
-  end
+  it "sends a TERM to children for a graceful shutdown" do
+    child_ipc_data = IPCData.new(nil, StringIO.new, nil)
 
-  it "sends a TERM to children when it receives INT or TERM" do
-    pending
+    child = fork do
+      Kernel.trap(:TERM) { exit!(0) }
+      Kernel.trap(:INT) { nil }
+      Kernel.trap(:QUIT) { nil }
+      sleep
+    end
+    @manager.children[child] = child_ipc_data
+    @manager.killall(false)
+    lambda {Process.waitpid2(child)}.should raise_error(Errno::ECHILD)
   end
 
 end
