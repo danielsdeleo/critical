@@ -22,6 +22,21 @@ module Critical
         log.info {"Critical is starting up, current PID: #{Process.pid}"}
         load_sources
         validate_config
+        config.continuous? ? run_continous : run_single
+      end
+
+      def run_single
+        scheduler.each do |task|
+          runner.run_monitor(task.monitor)
+        end
+      end
+
+      # a MonitorRunner used in single run mode
+      def runner
+        @runner ||= MonitorRunner.new(nil)
+      end
+
+      def run_continous
         daemonize! if daemonizing?
         init_self_pipe
         setup_signal_handling
