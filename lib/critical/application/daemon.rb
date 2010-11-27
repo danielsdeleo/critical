@@ -26,6 +26,8 @@ module Critical
       end
 
       def detach
+        Dir.chdir("/")
+
         delayed_exit if fork
         Process.setsid
         delayed_exit if fork
