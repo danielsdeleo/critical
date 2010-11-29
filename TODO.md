@@ -1,10 +1,6 @@
 # TODOs and Maybes #
 
-## BE AWARE ##
-* Visibility into running process
-
 ## TODO NOW ##
-* Implement signal queue in process manager
 * message sending needs to IO.select(nil,[writers],nil, timeout) so it doesn't
   deadlock if all the workers are dead/busy
 * retries after respawning workers in the above scenario
@@ -24,6 +20,7 @@
 * instantiate metrics from serializable data
 
 ## Maybe ##
+* use kgio instead of the built-ins.
 * log file load/search tool for ruby formatted logs -- a simple library to do that, plus irb wrapping
 * conf.d/ system, load .rb files from it?
 * json or yaml files support (for integration w/ cfg mgrs)
