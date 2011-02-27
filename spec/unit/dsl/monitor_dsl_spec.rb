@@ -15,7 +15,8 @@ module TestHarness
   end
   
   class MonitorExample
-    attr_accessor :fqn
+    #attr_accessor :fqn
+    attr_accessor :namespace
     attr_reader :initialized_with
     def initialize(*args)
       @initialized_with = args
@@ -104,12 +105,15 @@ describe DSL::MonitorDSL do
       snitch.should == :yep
     end
     
-    it "sets a monitor's fully qualified name" do
+    it "sets a monitor's namespace" do
       monitor = nil
       @dsl_user.Monitor(:network) do
-        monitor = ping("the_router")
+        monitor = monitor
+        Monitor(:routers) do
+          monitor = ping("the_core_router")
+        end
       end
-      monitor.fqn.should == "/network/#{monitor.to_s}"
+      monitor.namespace.should == [:network, :routers]
     end
 
     it "sets the interval" do

@@ -59,12 +59,20 @@ module Critical
       define_default_attribute(attribute) unless default_attr_defined?
     end
 
-    attr_accessor :fqn
-    attr_reader   :processing_block, :report, :metric_status
+    attr_accessor :namespace
+
+    attr_reader :processing_block
+    attr_reader :report
+    attr_reader :metric_status
 
     def initialize(arg=nil, &block)
       self.default_attribute= arg if arg && self.respond_to?(:default_attribute=)
       @processing_block = block
+      @namespace = []
+    end
+
+    def fqn
+      "/#{namespace.join('/')}/#{self}"
     end
 
     def metric_name
@@ -95,6 +103,7 @@ module Critical
       reset!
 
       @report = output_handler
+      @trending_handler = trending_handler
       output_handler.metric = self
 
       assert_collection_block_or_command_exists!
@@ -130,7 +139,7 @@ module Critical
       end
     end
 
-    # Sets the state of the metrci to :warning if the block evaluates to
+    # Sets the state of the metric to :warning if the block evaluates to
     # +true+ or raises an error.
     def warning(&block)
       begin

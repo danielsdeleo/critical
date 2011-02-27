@@ -150,6 +150,18 @@ describe Monitor do
       @metric_class.new("/tmp").to_s.should == "df(/tmp)"
     end
 
+    it "has a namespace" do
+      @metric_instance.namespace = [:foo, "bar", :baz]
+      @metric_instance.namespace.should == [:foo, "bar", :baz]
+    end
+
+    it "generates a fully qualified name from its namespace" do
+      instance = @metric_class.new("/tmp")
+      
+      instance.namespace = [:foo, "bar", :baz]
+      instance.fqn.should == "/foo/bar/baz/df(/tmp)"
+    end
+
   end
 
   describe "collecting metrics" do
@@ -241,6 +253,28 @@ describe Monitor do
       exception[:name].should == "Exception"
       exception[:message].should == "your collection is fail"
     end
+  end
+
+  describe "tracking the value of a metric" do
+    before do
+      @metric_class = Class.new(Critical::Monitor)
+      @metric_class.metric_name = :disk_utilization
+      @metric_class.monitors(:filesystem)
+      @metric_class.collects { :no_op_for_testing }
+
+      @output_handler = OutputHandler::Deferred.new(nil)
+    end
+
+    it "writes the value to the Graphite connection" do
+      @metric_instance = @metric_class.new("/") { track(:percentage, 25) }
+      @metric_instance.namespace = %w[system HOSTNAME]
+      puts "* " * 50
+      puts @metric_instance.fqn
+      @graphite_handler = mock("graphite handler mock")
+      
+      # graphite_connection.should_receive(:write).with('/', 25, :namespace => ['system', 'HOSTNAME', :disk_utilization, :percentage])
+    end
+
   end
 
   describe "reporting the results of collection" do

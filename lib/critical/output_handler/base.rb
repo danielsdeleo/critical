@@ -1,5 +1,8 @@
 module Critical
   module OutputHandler
+    # == Critical::OutputHandler::Base
+    # OutputHandlers do the work of reporting failed/out-of-bounds metrics
+    # to an alerting system.
     class Base
       
       def self.symbol_to_handler

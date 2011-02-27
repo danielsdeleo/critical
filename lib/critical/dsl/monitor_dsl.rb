@@ -1,4 +1,5 @@
 require 'singleton'
+require 'critical/dsl/hostname'
 
 module Critical
   
@@ -10,7 +11,9 @@ module Critical
       class MonitorNameToClassMap < Hash
         include Singleton
       end
-    
+
+      include Hostname
+
       extend self
     
       def self.define_metric(method_name, collector_class)
@@ -19,7 +22,7 @@ module Critical
         class_eval(<<-METHOD, __FILE__, __LINE__ + 1)
           def #{method_name.to_s}(arg=nil, &block)
             monitor = monitor_class_for[:#{method_name}].new(arg, &block)
-            monitor.fqn = current_namespace + '/' + monitor.to_s
+            monitor.namespace = namespace.dup
             push monitor
             monitor
           end 

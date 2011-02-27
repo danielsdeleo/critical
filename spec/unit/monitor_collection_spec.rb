@@ -18,6 +18,7 @@ describe MonitorCollection do
       @metric_class.collects { :no_op_for_testing }
       
       @monitor = @metric_class.new
+      @monitor.namespace = %w[system disk_utilization]
     end
     
     it "creates a task for each monitor" do
@@ -26,27 +27,27 @@ describe MonitorCollection do
     end
     
     it "stores and finds monitors by fully qualified name" do
-      @monitor.fqn = "/unix_boxes/disks/df(/tmp)"
+      @monitor.default_attribute = '/tmp'
       @collection.push @monitor
-      @collection.find("/unix_boxes/disks/df(/tmp)").should equal(@monitor)
+      @collection.find("/system/disk_utilization/df(/tmp)").should equal(@monitor)
     end
     
     it "stores multiple monitors in the same namespace if they have different short names" do
-      @monitor.fqn = "/unix_boxes/disks/df(/)"
+      @monitor.default_attribute = '/'
       @collection.push @monitor
-      @monitor.fqn = "/unix_boxes/disks/df(/var)"
+      @monitor.default_attribute = '/var'
       @collection.push @monitor
-      @collection.find("/unix_boxes/disks/df(/)").should equal(@monitor)
-      @collection.find("/unix_boxes/disks/df(/var)").should equal(@monitor)
+      @collection.find("/system/disk_utilization/df(/)").should equal(@monitor)
+      @collection.find("/system/disk_utilization/df(/var)").should equal(@monitor)
     end
     
     it "either replaces a monitor when adding another one with the same name in a namespace" do
-      @monitor.fqn = "/unix_boxes/disks/df(/var)"
+      @monitor.default_attribute = "/var"
       monitor1 = @monitor.dup
       monitor2 = @monitor.dup
       @collection.push monitor1
       @collection.push monitor2
-      @collection.find("/unix_boxes/disks/df(/var)").should equal monitor2
+      @collection.find("/system/disk_utilization/df(/var)").should equal monitor2
     end
     
     it "gives nil if the monitor cannot be found" do
@@ -58,12 +59,14 @@ describe MonitorCollection do
   describe "enumerating over the monitors in the collection" do
     before do
       @metric_class = Class.new(Critical::Monitor)
+      @metric_class.metric_name = :df
+      @metric_class.monitors(:filesystem)
       @foo_monitor = @metric_class.new
-      @foo_monitor.fqn = "foo"
+      @foo_monitor.default_attribute = "foo"
       @bar_monitor = @metric_class.new
-      @bar_monitor.fqn = "bar"
+      @bar_monitor.default_attribute = "bar"
       @baz_monitor = @metric_class.new
-      @baz_monitor.fqn = "baz"
+      @baz_monitor.default_attribute = "baz"
       @collection << @foo_monitor << @bar_monitor << @baz_monitor
     end
     

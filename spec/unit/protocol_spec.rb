@@ -1,5 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
+# TODO: separate concerns.
 # currently:
 #   ## IN Critical::Subprocess ##
 #       if msg = reader.gets(nil)

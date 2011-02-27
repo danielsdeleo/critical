@@ -3,6 +3,7 @@ module Critical
     module TopLevel
       extend DSL::MetricDSL
       extend Loggable
+      extend Hostname
       
       # forwarded to the MonitorCollection instance
       def self.Monitor(*args, &block)

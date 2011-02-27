@@ -37,29 +37,30 @@ end
 # external aggregators (not yet implememnted.)
 #
 # Monitors are also where you define your scheduling.
-Monitor(:unix_box) do
-  
-  # Specify collection intervals with +every+ or +collect_every+
-  # The +every+ form takes a block, each monitor you define inside the block
-  # will be scheduled to run at that interval.
-  every(15=>:seconds) do
+Monitor(:system) do
+  Monitor(hostname) do
+    # Specify collection intervals with +every+ or +collect_every+
+    # The +every+ form takes a block, each monitor you define inside the block
+    # will be scheduled to run at that interval.
+    every(10=>:seconds) do
     
-    # Monitor statements can be nested, this nesting will be included in the
-    # collected data for tracking/tagging purposes.
-    # You can also use a block variable with Monitor if you prefer that style:
-    Monitor(:disks) do |disks|
+      # Monitor statements can be nested, this nesting will be included in the
+      # collected data for tracking/tagging purposes.
+      # You can also use a block variable with Monitor if you prefer that style:
+      Monitor(:disk_utilization) do |disks|
       
-      # Monitors are defined in terms of the metrics they use. In this case,
-      # we use the df() metric defined above. This metric is 
-      # /unix_box/disks/df(/) in the namespace.
-      #
-      # If you hadn't passed a block variable to +Monitor+ above, you could
-      # just write <tt>df("/")</tt> instead of <tt>disks.df("/")</tt>
-      disks.df("/") do |root_partition|
-        root_partition.warning  { root_partition.percentage <= 75 }
-        # implemented:
-        root_partition.critical {root_partition.percentage <= 85 }
-        ###root_partition.percentage.trend("root partition", opts={})
+        # Monitors are defined in terms of the metrics they use. In this case,
+        # we use the df() metric defined above. This metric is 
+        # /unix_box/disks/df(/) in the namespace.
+        #
+        # If you hadn't passed a block variable to +Monitor+ above, you could
+        # just write <tt>df("/")</tt> instead of <tt>disks.df("/")</tt>
+        disks.df("/") do |root_partition|
+          root_partition.warning  { percentage <= 40 }
+          # implemented:
+          root_partition.critical { percentage <= 35 }
+          ###root_partition.percentage.trend("root partition", opts={})
+        end
       end
     end
   end
