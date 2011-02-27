@@ -197,9 +197,9 @@ describe MetricCollectionInstance do
       
       $VERBOSE = nil
 
-      @graphite_connection.should_receive(:write).with('system.HOSTNAME.disk_utilization.percentage', 25)
+      @graphite_connection.should_receive(:write).with('system.HOSTNAME.disk_utilization.percentage./', 25)
       collector.collect
-      pp collector.report
+      #pp collector.report
     end
 
   end

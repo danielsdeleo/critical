@@ -1,8 +1,31 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 require 'critical/trending/graphite'
 
+class MonitorWithoutDefaultAttr < Struct.new(:metric_name, :namespace)
+end
+
+class MonitorWithDefaultAttr < Struct.new(:default_attribute, :metric_name, :namespace)
+end
+
 describe Trending::GraphiteHandler do
-  
+  before do
+    @socket = mock("TCPSocket-mocked")
+    @socket_conection = StringIO.new
+    @socket.stub!(:new).and_return(@socket_conection)
+    @connection = Trending::GraphiteHandler::Connection.new('localhost', 2003, @socket)
+    @handler = Trending::GraphiteHandler.new(@connection)
+  end
+
+  it "generates the graphite routing key from the monitor's namespace" do
+    monitor = MonitorWithoutDefaultAttr.new(:memory_utilization, %w[system HOSTNAME])
+    @handler.graphite_key_for(monitor, :mb_used).should == 'system.HOSTNAME.memory_utilization.mb_used'
+  end
+
+  it "generates the graphite routing key from the monitor's namespace with the default attr added" do
+    monitor = MonitorWithDefaultAttr.new('/', :disk_utilization, %w[system HOSTNAME])
+    @handler.graphite_key_for(monitor, :percentage).should == 'system.HOSTNAME.disk_utilization.percentage./'
+  end
+
 end
 
 describe Trending::GraphiteHandler::Connection do

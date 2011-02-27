@@ -4,6 +4,7 @@ module Critical
       extend DSL::MetricDSL
       extend Loggable
       extend Hostname
+      extend LibraryMetricLoader
       
       # forwarded to the MonitorCollection instance
       def self.Monitor(*args, &block)

@@ -58,4 +58,51 @@ module Critical
       raise Critical::LoadError, "Could not load the file #{file} -- The OS says it doesn't exist"
     end
   end
+
+  module LibraryMetricLoader
+    extend self
+    extend Loggable
+
+    METRIC_PATH_SPEC = /(#{Regexp.escape 'critical/metrics/'}(.+))\.rb/
+    METRIC_REQUIRE_PATHS = {}
+
+    def add_library_metric(path)
+      match = METRIC_PATH_SPEC.match(path)
+      METRIC_REQUIRE_PATHS[match[2]] = match[1]
+    end
+
+    begin
+      require 'rubygems'
+      Gem.find_files('critical/metrics/*.rb').each do |file|
+        add_library_metric(file)
+      end
+    rescue LoadError
+    end
+
+    Dir[File.expand_path('../metrics/*.rb', __FILE__)].each do |file|
+      add_library_metric(file)
+    end
+
+    def require_metric(name)
+      if path = METRIC_REQUIRE_PATHS[name]
+        require path
+      else
+        log.debug { "Metric #{name} not found" }
+        msg = "The metric #{name} was not found in the stdlib or any installed gems\n"
+        msg << "Available metrics are: #{METRIC_REQUIRE_PATHS.keys.join(',')}"
+        raise LoadError, msg
+      end
+    end
+
+    def reset_metric_load_paths!(*paths)
+      METRIC_REQUIRE_PATHS.clear
+      paths.each do |path|
+        Dir[File.join(path, '*.rb')].each do |file|
+          add_library_metric(file)
+        end
+      end
+    end
+
+  end
+
 end

@@ -30,3 +30,24 @@ describe FileLoader do
     lambda {FileLoader.load_in_context(@context_obj, file_to_load)}.should raise_error(Critical::LoadError)
   end
 end
+
+describe LibraryMetricLoader do
+  before do
+    $disk_utilization_example = false
+    $memory_utilization_example = true
+    LibraryMetricLoader.reset_metric_load_paths!(File.expand_path('../../fixtures/critical/metrics', __FILE__))
+    $:.unshift(File.expand_path('../../fixtures', __FILE__))
+  end
+
+  after do
+    $:.shift
+  end
+
+  it "finds and loads metrics" do
+    LibraryMetricLoader.require_metric('disk_utilization_example')
+    LibraryMetricLoader.require_metric('memory_utilization_example')
+    $disk_utilization_example.should be_true
+    $memory_utilization_example.should be_true
+  end
+
+end

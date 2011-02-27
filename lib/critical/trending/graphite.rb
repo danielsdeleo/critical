@@ -11,16 +11,13 @@ module Critical
       end
 
       def write_metric(tag, value, monitor)
-        graphite_key = graphite_namespace_for(monitor, tag).join(".")
-        connection.write(graphite_key, value)
+        connection.write(graphite_key_for(monitor, tag), value)
       end
 
-      def graphite_namespace_for(monitor, tag)
-        if monitor.respond_to?(:default_attribute)
-          monitor.namespace + [monitor.metric_name, tag]
-        else
-          monitor.namespace + [tag]
-        end
+      def graphite_key_for(monitor, tag)
+        key_path = monitor.namespace + [monitor.metric_name, tag]
+        key_path << monitor.default_attribute if monitor.respond_to?(:default_attribute)
+        key_path.join(".")
       end
 
       class Connection
