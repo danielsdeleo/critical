@@ -1,5 +1,5 @@
-require 'mechanize'
-require 'webrat'
+# require 'mechanize'
+# require 'webrat'
 
 Metric(:browser) do
   

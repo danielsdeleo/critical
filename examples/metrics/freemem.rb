@@ -20,11 +20,16 @@ Metric(:freemem) do
   end
 end
 
-Monitor(:memory) do
+Monitor(:system) do
+  Monitor(hostname) do
+    Monitor(:memory) do
+
+      collect_every(10 => :seconds)
+
+      freemem do
+        track(:mb_free)
+      end
   
-  freemem do
-    #record memory.mb_free #or some such API...
-    critical { mb_free.should be > 1512}
+    end
   end
-  
 end

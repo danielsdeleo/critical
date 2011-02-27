@@ -52,6 +52,7 @@ module Critical
 
     attr_reader :monitor
     attr_reader :output_handler
+    attr_reader :trending_handler
     attr_reader :metric_status
 
     alias :report :output_handler
@@ -90,6 +91,10 @@ module Critical
     def collect
       report.collected_at = Time.new
       run_processing_block
+    end
+
+    def track(what)
+      @trending_handler.write_metric(what, send(what), monitor)
     end
 
     # Sets the state of the metric to +status_on_failure+ (defaults to :critical)

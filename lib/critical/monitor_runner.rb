@@ -11,6 +11,7 @@ module Critical
 
     def initialize(ipc)
       @ipc = ipc
+      @graphite_handler = Trending::GraphiteHandler.new
     end
 
     def run
@@ -39,7 +40,7 @@ module Critical
 
     def collect(monitor)
       log.debug { "Starting collection for #{monitor.fqn}"}
-      monitor.collect(OutputHandler::Dispatcher.new)
+      monitor.collect(OutputHandler::Dispatcher.new, @graphite_handler)
       log.info { "Collected #{monitor.fqn}"}
     end
 

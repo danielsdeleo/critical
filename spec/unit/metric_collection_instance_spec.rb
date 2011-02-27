@@ -5,7 +5,8 @@ describe MetricCollectionInstance do
     @metric_class = Class.new(Critical::Monitor)
     @output_handler = OutputHandler::Deferred.new(nil)
     @monitor = @metric_class.new
-    @trending_handler = nil #for now
+    @graphite_connection = mock("GraphiteHandler (mocked)")
+    @trending_handler = Trending::GraphiteHandler.new(@graphite_connection)
 
     @metric_collector_class = Class.new(MetricCollectionInstance)
     @metric_collector_class.class_eval { attr_accessor :snitch }
@@ -80,7 +81,7 @@ describe MetricCollectionInstance do
     end
 
     it "has a reference to the trending handler" do
-      pending
+      @metric_collection_instance.trending_handler.should == @trending_handler
     end
 
     it "raises an error if collect is called and no collection block is defined" do
@@ -189,15 +190,16 @@ describe MetricCollectionInstance do
     end
 
     it "writes the value to the Graphite connection" do
-      monitor = @metric_class.new("/") { track(:percentage, 25) }
+      @metric_class.reports(:percentage) { 25 }
+      monitor = @metric_class.new("/") { track(:percentage); raise "wtf" }
       monitor.namespace = %w[system HOSTNAME]
-      collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
-      pending
-      #puts "* " * 50
-      #puts @metric_instance.fqn
-      #@graphite_handler = mock("graphite handler mock")
-    
-      # graphite_connection.should_receive(:write).with('/', 25, :namespace => ['system', 'HOSTNAME', :disk_utilization, :percentage])
+      collector = monitor.collector(@output_handler, @trending_handler)
+      
+      $VERBOSE = nil
+
+      @graphite_connection.should_receive(:write).with('system.HOSTNAME.disk_utilization.percentage', 25)
+      collector.collect
+      pp collector.report
     end
 
   end

@@ -1,6 +1,10 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 require 'critical/trending/graphite'
 
+describe Trending::GraphiteHandler do
+  
+end
+
 describe Trending::GraphiteHandler::Connection do
   describe "creating a connection" do
     before do
@@ -53,7 +57,7 @@ describe Trending::GraphiteHandler::Connection do
 
       it "writes data to the socket in graphite's format" do
         @connection.stub!(:timestamp).and_return(1298765441)
-        @connection.write('/', 25, :namespace => [:system, "www5", :disk_utilization, :percentage])
+        @connection.write('system.www5.disk_utilization.percentage./', 25)
         @socket.string.should == "system.www5.disk_utilization.percentage./ 25 1298765441\n"
       end
 

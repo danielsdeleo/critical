@@ -24,7 +24,7 @@ module Critical
       extend CLIOptionParser::ClassMethods
       include CLIOptionParser::InstanceMethods
       
-      help_banner "Critical: Not even 0.0.1 yet."
+      help_banner "Critical: Let's make data pr0n."
       help_footer "http://github.com/danielsdeleo/critical"
       
       def self.configure!
@@ -104,6 +104,24 @@ module Critical
 
       def continuous?
         @continuous || false
+      end
+
+      option "Hostname of the graphite/carbon server", :short => :g, :arg => "HOSTNAME"
+      def graphite_host=(graphite_host)
+        @graphite_host = graphite_host
+      end
+
+      def graphite_host
+        @graphite_host || 'localhost'
+      end
+
+      option "Port the graphite/carbon server listens on", :short => :G, :arg => 'PORT'
+      def graphite_port=(port)
+        @graphite_port = port.to_i
+      end
+
+      def graphite_port
+        @graphite_port || 2003
       end
 
       option "A sting of ruby code to evaluate", :short => :e, :arg => :code
