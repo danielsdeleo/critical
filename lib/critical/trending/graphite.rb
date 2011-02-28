@@ -17,7 +17,7 @@ module Critical
       def graphite_key_for(monitor, tag)
         key_path = monitor.namespace + [monitor.metric_name, tag]
         key_path << monitor.default_attribute if monitor.respond_to?(:default_attribute)
-        key_path.join(".")
+        key_path.join(".").gsub(/[\s\:]+/, '-')
       end
 
       class Connection

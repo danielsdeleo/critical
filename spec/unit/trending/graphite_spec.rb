@@ -26,6 +26,11 @@ describe Trending::GraphiteHandler do
     @handler.graphite_key_for(monitor, :percentage).should == 'system.HOSTNAME.disk_utilization.percentage./'
   end
 
+  it "strips invalid chars from the routing key" do
+    monitor = MonitorWithDefaultAttr.new('critical : worker', :cluster, %w[system HOSTNAME])
+    @handler.graphite_key_for(monitor, :count).should == 'system.HOSTNAME.cluster.count.critical-worker'
+  end
+
 end
 
 describe Trending::GraphiteHandler::Connection do
