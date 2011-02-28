@@ -1,11 +1,15 @@
 # TODOs and Maybes #
 
 ## TODO NOW ##
+* fix the relationship between metrics, monitors, and metric\_collection\_instances.
+  currently metrics are collected in metric\_collection\_instances, but you can't
+  define methods there. not-so-cool workaround is in the cluster metric
 * message sending needs to IO.select(nil,[writers],nil, timeout) so it doesn't
   deadlock if all the workers are dead/busy
 * retries after respawning workers in the above scenario
-* reimplement scheduling using linked list
-* cleanup integration between output handling and new expectation system
+* reimplement scheduling (linked list?)
+* finish integration between output handling and new expectation system
+* integrate ohai so you can have auto-monitors (e.g., loop over all available disks)
 
 ## TODO ##
 * CLI client to submit a task to the queue manually

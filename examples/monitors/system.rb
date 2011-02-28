@@ -1,6 +1,7 @@
 require_metric 'disk_utilization'
 require_metric 'memory_utilization'
 require_metric 'cpu_utilization'
+require_metric 'cluster'
 
 # Monitors use metrics to gather data. They can make judgements about that data
 # i.e., the root partition should be less than 90% full, or forward the data to
@@ -19,8 +20,18 @@ Monitor(:system) do
     every(10=>:seconds) do
 
       disk_utilization('/') { track :percentage }
+
       memory_utilization { track :bytes_used }
+
       cpu_utilization {track :percent_used}
+
+      cluster("critical : worker") do |c|
+        c.track :processes
+        c.track :total_cpu
+        c.track :total_rss
+        c.track :uptime
+      end
+
     end
   end
 end
