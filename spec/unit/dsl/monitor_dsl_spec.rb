@@ -60,7 +60,11 @@ describe DSL::MonitorDSL do
     it "raises an error when attempting to create a namespace with an invalid char" do
       lambda {@dsl_user.Monitor("foo/bar")}.should raise_error(InvalidNamespace)
     end
-    
+
+    it "allows the - character in namespaces (for hostnames)" do
+      lambda {@dsl_user.Monitor("foo-bar")}.should_not raise_error(InvalidNamespace)
+    end
+
     it "raises an error when attempting to create a namespace with a non-string or symbol object" do
       subclassing_string_works = Class.new(String).new("foobar")
       lambda {@dsl_user.Monitor(subclassing_string_works){}}.should_not raise_error

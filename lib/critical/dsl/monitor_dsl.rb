@@ -69,9 +69,9 @@ module Critical
           raise InvalidNamespace, reason
         end
       
-        if invalid_char = namespace_name.to_s[/[^A-Za-z_0-9]/]
+        if invalid_char = namespace_name.to_s[/[^A-Za-z_0-9\-]/]
           reason = "The namespace #{namespace_name} is invalid because it contains #{invalid_char}. "
-          reason << "Valid characters are: A-Z a-z _ 0-9"
+          reason << "Valid characters are: A-Z a-z _ 0-9 -"
           raise InvalidNamespace, reason
         end
       end
