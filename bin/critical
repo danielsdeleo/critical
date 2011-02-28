@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'rubygems' rescue nil
+
 # Are we in a source tree checkout?
 path_to_lib = File.dirname(__FILE__) + '/../lib/critical.rb'
 if File.file?(path_to_lib)

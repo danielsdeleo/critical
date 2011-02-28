@@ -12,10 +12,11 @@ See bin/critical --help and the examples directory
 Critical is my take on network/infrastructure monitoring. Here are the big ideas:
 * Infrastructure as code: The monitoring system should be an internal DSL so it can natively interact with any part of your infrastructure you can find or write a library for. You should also be able to productively alter its guts if you need to. This is a monitoring system for ops people who write code and coders who do ops.
 * Declarative: Declare what the state of your system is supposed to be.
+* Alerting and Trending together: a client/agent can do both of these at the same time with less configuration overhead. It makes sense to keep them separate on the server side.
 * Licensing: "Do what thou wilt shall be the whole of the law," except for patent trolls, etc. So, Apache 2.0 it is.
 
 == Project Status
-The client runs and monitors the system, but you'll have to get your hands dirty and write the code if you want it to actually alert you if something goes wrong. A server to collect metrics and dispatch alerts is planned but not implemented at all. 
+Initial work focused on the alerting half of the alerting/trending combo that comprises "monitoring." I've pivoted and am currently focusing on making it dead simple to get data into graphite. Alerting is still a long term priority.
 
 = License and Copyright
 Distributed under the terms of the Apache 2.0 license. (c) 2010 Daniel DeLeo

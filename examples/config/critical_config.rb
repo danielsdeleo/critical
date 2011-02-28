@@ -7,8 +7,8 @@ require 'critical/monkey_patch/string'
 
 Critical.configure do |critical|
   root = File.dirname(__FILE__) + '/../'
-  critical.require root + "metrics/"
-  #critical.require root + "monitors/"
+  #critical.require root + "metrics/"
+  critical.require root + "monitors/"
   
   critical.reporting do |reports|
     reports.as  :text, :output => STDOUT

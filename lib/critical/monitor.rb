@@ -4,6 +4,12 @@ module Critical
   module Metrics
   end
 
+  # == Critical::UnsupportedPlatform
+  # For use by metrics that need to work differently on different platforms.
+  # Not used internally
+  class UnsupportedPlatform < RuntimeError
+  end
+
   class Monitor
 
     class << self

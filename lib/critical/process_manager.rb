@@ -1,5 +1,6 @@
 require 'tempfile'
 require 'socket'
+require 'fcntl'
 require 'singleton'
 
 module Critical

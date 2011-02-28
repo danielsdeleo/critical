@@ -68,7 +68,7 @@ module Critical
 
     def add_library_metric(path)
       match = METRIC_PATH_SPEC.match(path)
-      METRIC_REQUIRE_PATHS[match[2]] = match[1]
+      METRIC_REQUIRE_PATHS[match[2]] = path
     end
 
     begin
@@ -85,7 +85,7 @@ module Critical
 
     def require_metric(name)
       if path = METRIC_REQUIRE_PATHS[name]
-        require path
+        FileLoader.load_metrics_and_monitors_in(path)
       else
         log.debug { "Metric #{name} not found" }
         msg = "The metric #{name} was not found in the stdlib or any installed gems\n"
