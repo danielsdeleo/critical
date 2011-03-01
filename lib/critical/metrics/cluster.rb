@@ -44,10 +44,7 @@ Metric(:cluster) do
 
   # The uptime of the longest-lived process in the group
   reports(:uptime => :int) do
-    # BUG/TODO: the way metrics are defined vs. collected means you can't define
-    # methods directly on the objects that collect the data :( so you have to
-    # know to call methods on the monitor object. lame.
-    matching_processes.map { |proc_data| monitor.etime_to_i(proc_data[3])  }.max
+    matching_processes.map { |proc_data| etime_to_i(proc_data[3])  }.max
   end
 
 end
