@@ -1,13 +1,20 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 require 'critical/trending/graphite'
 
-class MonitorWithoutDefaultAttr < Struct.new(:metric_name, :namespace)
-end
+module TestHarness
+  class MonitorWithoutDefaultAttr < Struct.new(:metric_name, :namespace)
+    def default_attribute
+      nil
+    end
+  end
 
-class MonitorWithDefaultAttr < Struct.new(:default_attribute, :metric_name, :namespace)
+  class MonitorWithDefaultAttr < Struct.new(:default_attribute, :metric_name, :namespace)
+  end
 end
 
 describe Trending::GraphiteHandler do
+  include TestHarness
+
   before do
     @socket = mock("TCPSocket-mocked")
     @socket_conection = StringIO.new

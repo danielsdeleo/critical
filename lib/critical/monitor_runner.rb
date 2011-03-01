@@ -24,9 +24,9 @@ module Critical
       end
     end
 
-    def run_monitor(monitor_name)
-      if monitor = MonitorCollection.instance.find(monitor_name)
-        collect(monitor)
+    def run_monitor(metric_fqn)
+      if metric_spec = collection.find(metric_fqn)
+        collect(metric_spec)
       else
         log.error "Could not find monitor named #{monitor_name} to run"
       end
@@ -38,10 +38,10 @@ module Critical
        MonitorCollection.instance
     end
 
-    def collect(monitor)
-      log.debug { "Starting collection for #{monitor.fqn}"}
-      monitor.collect(OutputHandler::Dispatcher.new, @graphite_handler)
-      log.info { "Collected #{monitor.fqn}"}
+    def collect(metric_spec)
+      log.info { "Collecting #{metric_spec.fqn}"}
+      metric_spec.new_metric.collect(OutputHandler::Dispatcher.new, @graphite_handler)
+      log.debug { "Collected #{metric_spec.fqn}"}
     end
 
   end

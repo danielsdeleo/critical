@@ -10,13 +10,13 @@ module Critical
         @connection = connection || Connection.new(Critical.config.graphite_host, Critical.config.graphite_port)
       end
 
-      def write_metric(tag, value, monitor)
-        connection.write(graphite_key_for(monitor, tag), value)
+      def write_metric(tag, value, metric)
+        connection.write(graphite_key_for(metric, tag), value)
       end
 
-      def graphite_key_for(monitor, tag)
-        key_path = monitor.namespace + [monitor.metric_name, tag]
-        key_path << monitor.default_attribute if monitor.respond_to?(:default_attribute)
+      def graphite_key_for(metric, tag)
+        key_path = metric.namespace + [metric.metric_name, tag]
+        key_path << metric.default_attribute if metric.default_attribute
         key_path.join(".").gsub(/[\s\:]+/, '-')
       end
 
@@ -51,7 +51,9 @@ module Critical
         end
 
         def write(key, value)
-          socket.write("#{key} #{value} #{timestamp}\n")
+          graphite_msg = "#{key} #{value} #{timestamp}\n"
+          log.debug { "Writing data to graphite: #{graphite_msg}" }
+          socket.write(graphite_msg)
           socket.flush
         rescue SystemCallError => e
           log.error { "Error writing to graphite/carbon: #{e.message}" }

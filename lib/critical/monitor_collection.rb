@@ -20,10 +20,10 @@ module Critical
       @monitors, @tasks = {}, []
     end
     
-    def push(monitor)
-      log.debug { "adding monitor #{monitor.fqn} to collection"}
-      @monitors[monitor.fqn] = monitor
-      @tasks << Scheduler::Task.new(monitor.fqn, (interval || 600))
+    def push(monitor_specification)
+      log.debug { "adding monitor #{monitor_specification.fqn} to collection"}
+      @monitors[monitor_specification.fqn] = monitor_specification
+      @tasks << Scheduler::Task.new(monitor_specification.fqn, (interval || 600))
       self
     end
     alias :<< :push

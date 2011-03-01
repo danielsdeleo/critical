@@ -87,10 +87,11 @@ end
 
 describe StoryMonitor::Step do
   before do
-    @metric = Class.new(Critical::Monitor)
-    @metric.metric_name = :browser
-    @metric.monitors(:base_url)
-    @monitor = @metric.new
+    @metric_class = Class.new(Critical::MetricBase)
+    @metric_class.metric_name = :browser
+    @metric_class.monitors(:base_url)
+    @metric_spec = MetricSpecification.new(@metric_spec, nil, [], nil)
+    @metric = @metric_class.new(@metric_spec)
     Critical::DSL::MonitorDSL.define_metric(:browser, @metric)
 
     @story = StoryMonitor.new("Create a new blog and write an article")
@@ -110,9 +111,9 @@ describe StoryMonitor::Step do
   end
 
   it "pushes new monitors into its collection" do
-    @step.push @monitor
+    @step.push @metric
     @step.should have(1).monitors
-    @step.push @monitor
+    @step.push @metric
     @step.should have(2).monitors
   end
 
