@@ -14,18 +14,36 @@ module TestHarness
     
   end
   
-  class MonitorExample
-    #attr_accessor :fqn
-    attr_accessor :namespace
-    attr_reader :initialized_with
-    def initialize(*args)
-      @initialized_with = args
-    end
-    
-    def to_s
-      @initialized_with.first.to_s + "_faked"
+  class MonitorExample < MetricBase
+    def self.metric_name
+      :df
     end
   end
+end
+
+describe MetricSpecification do
+
+  before do
+    @metric_processing_block = lambda { :processing_block }
+    @namespace = [:foo, "bar", :baz]
+    @metric_spec = MetricSpecification.new(TestHarness::MonitorExample, "/tmp", @namespace, @metric_processing_block)
+  end
+
+  it "has a namespace" do
+    @metric_spec.namespace.should == [:foo, "bar", :baz]
+  end
+
+  it "generates a fully qualified name from its namespace" do
+    @metric_spec.fqn.should == "/foo/bar/baz/df(/tmp)"
+  end
+
+  it "initializes a new metric" do
+    metric = @metric_spec.new_metric
+    metric.processing_block.call.should == :processing_block
+    metric.namespace.should == [:foo, "bar", :baz]
+    metric.fqn.should == "/foo/bar/baz/df(/tmp)"
+  end
+
 end
 
 describe DSL::MonitorDSL do
@@ -39,14 +57,29 @@ describe DSL::MonitorDSL do
     @dsl_user.should respond_to(:ping)
   end
   
-  it "creates a new instance of a class when the DSL method is called" do
-    @dsl_user.ping.should be_an_instance_of(@metric)
+  it "creates a metric specification when the metric method is called" do
+    #@dsl_user.ping.should be_an_instance_of(@metric)
+    @dsl_user.ping.should be_an_instance_of(MetricSpecification)
   end
   
-  it "passes the first argument to the DSL method to the initializer of the metric class" do
-    @dsl_user.ping(:xx).initialized_with.should == [:xx]
+  it "adds the first argument to the metric specification" do
+    @dsl_user.ping(:xx).default_attribute.should == :xx
   end
-    
+
+  it "passes the block to the metric specification" do
+    block = lambda { :hello }
+    @dsl_user.ping(:xx, &block).processing_block.call.should == :hello
+  end
+
+  it "sets the current namespace on the metric specification" do
+    @dsl_user.namespace.concat [:system, :HOSTNAME]
+    @dsl_user.ping(:xx).namespace.should == [:system, :HOSTNAME]
+  end
+
+  it "sets the corresponding MetricBase class on the metric specification" do
+    @dsl_user.ping(:xx).metric_class.should equal(TestHarness::MonitorExample)
+  end
+
   it "adds the metric to the metric collection" do
     metric = @dsl_user.ping(:my_webserver)
     @dsl_user.metric_collection.should include(metric)

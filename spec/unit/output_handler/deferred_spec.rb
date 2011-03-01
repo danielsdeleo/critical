@@ -5,7 +5,8 @@ describe OutputHandler::Deferred do
     metric_collector_class = Class.new(Critical::MetricBase)
     metric_collector_class.metric_name = :disk_io
     metric_collector_class.monitors(:filesystem)
-    @metric_collector = metric_collector_class.new
+    @metric_spec = MetricSpecification.new(metric_collector_class, nil, [], nil)
+    @metric_collector = metric_collector_class.new(@metric_spec)
     @handler = OutputHandler::Deferred.new(@metric_collector)
     
     @error = StandardError.new("A sample error message")

@@ -6,8 +6,33 @@ module Critical
   class InvalidNamespace < StandardError
   end
 
+  class MetricSpecification < Struct.new(:metric_class, :default_attribute, :namespace, :processing_block)
+
+    def new_metric
+      metric_class.new(self)
+    end
+
+    def fqn
+      "/#{namespace.join('/')}/#{metric_name}"
+    end
+
+    def metric_type
+      metric_class.metric_name
+    end
+
+    def metric_name
+      if default_attribute
+        metric_type.to_s + "(#{default_attribute})"
+      else
+        metric_type.to_s
+      end
+    end
+
+  end
+
   module DSL
     module MonitorDSL
+
       class MonitorNameToClassMap < Hash
         include Singleton
       end
@@ -21,10 +46,10 @@ module Critical
       
         class_eval(<<-METHOD, __FILE__, __LINE__ + 1)
           def #{method_name.to_s}(arg=nil, &block)
-            monitor = monitor_class_for[:#{method_name}].new(arg, &block)
-            monitor.namespace = namespace.dup
-            push monitor
-            monitor
+            metric_class = monitor_class_for[:#{method_name}]
+            metric_spec = MetricSpecification.new(metric_class, arg, namespace.dup, block)
+            push metric_spec
+            metric_spec
           end 
         METHOD
       end

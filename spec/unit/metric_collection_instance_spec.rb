@@ -3,8 +3,9 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 describe MetricCollectionInstance do
   before do
     @metric_class = Class.new(Critical::MetricBase)
+    @metric_spec = MetricSpecification.new(@metric_class, :url, [], Proc.new {})
     @output_handler = OutputHandler::Deferred.new(nil)
-    @monitor = @metric_class.new
+    @monitor = @metric_class.new(@metric_spec)
     @graphite_connection = mock("GraphiteHandler (mocked)")
     @trending_handler = Trending::GraphiteHandler.new(@graphite_connection)
 
@@ -29,7 +30,7 @@ describe MetricCollectionInstance do
     before do
       @metric_class = Class.new(Critical::MetricBase)
       @metric_class.collects { 'the answer is 42'}
-      @monitor = @metric_class.new
+      @monitor = @metric_class.new(@metric_spec)
       @metric_collection_instance = @metric_collector_class.new(@monitor, @output_handler, @trending_handler)
     end
 
@@ -89,14 +90,16 @@ describe MetricCollectionInstance do
     end
 
     it "takes a block to execute expectations and reporting on checks" do
-      monitor = @metric_class.new { 'here I come' }
+      @metric_spec.processing_block = Proc.new { 'here I come' }
+      monitor = @metric_class.new(@metric_spec)
       collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
       collector.processing_block.call.should == 'here I come'
     end
 
     it "passes itself into the handler block if a block with arity 1 is given" do
       @metric_class.collects { :some_data }
-      monitor = @metric_class.new { |m| m.snitch= :yoshitoshi}
+      @metric_spec.processing_block = Proc.new { |m| m.snitch= :yoshitoshi}
+      monitor = @metric_class.new(@metric_spec)
 
       collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
       collector.collect
@@ -105,8 +108,8 @@ describe MetricCollectionInstance do
 
     it "instance evals the block against 'self' if a block with arity 0 is given" do
       @metric_class.collects { :metric_result }
-
-      monitor = @metric_class.new { self.snitch = :yoshiesque }
+      @metric_spec.processing_block = Proc.new { self.snitch = :yoshiesque }
+      monitor = @metric_class.new(@metric_spec)
       collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
       collector.collect
       collector.snitch.should == :yoshiesque
@@ -115,14 +118,16 @@ describe MetricCollectionInstance do
     it "rescues errors that occur during result checking or result handling" do
       @metric_class.collects { :some_data }
 
-      monitor = @metric_class.new { raise Exception, "an example exception" }
+      @metric_spec.processing_block = Proc.new { raise Exception, "an example exception" }
+      monitor = @metric_class.new(@metric_spec)
       collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
       lambda {collector.collect}.should_not raise_error
     end
 
     it "adds errors during processing to the collection report" do
       @metric_class.collects { :some_data }
-      monitor = @metric_class.new { raise Exception, "an example exception" }
+      @metric_spec.processing_block = Proc.new { raise Exception, "an example exception" }
+      monitor = @metric_class.new(@metric_spec)
       collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
       collector.collect
 
@@ -134,9 +139,11 @@ describe MetricCollectionInstance do
 
     it "adds errors during collection to the collection report" do
       @metric_class.collects { raise Exception, "your collection is fail"}
-      monitor = @metric_class.new { result }
+      @metric_spec.processing_block = Proc.new  { result }
+      monitor = @metric_class.new(@metric_spec)
       collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
       collector.collect
+
 
       collector.report.failed_in.should == :collection
       exception = collector.report.errors.first
@@ -191,15 +198,16 @@ describe MetricCollectionInstance do
 
     it "writes the value to the Graphite connection" do
       @metric_class.reports(:percentage) { 25 }
-      monitor = @metric_class.new("/") { track(:percentage); raise "wtf" }
-      monitor.namespace = %w[system HOSTNAME]
+      @metric_spec.processing_block = Proc.new { track(:percentage); raise "wtf" }
+      @metric_spec.namespace = %w[system HOSTNAME]
+      @metric_spec.default_attribute = "/"
+      monitor = @metric_class.new(@metric_spec)
       collector = monitor.collector(@output_handler, @trending_handler)
       
       $VERBOSE = nil
 
       @graphite_connection.should_receive(:write).with('system.HOSTNAME.disk_utilization.percentage./', 25)
       collector.collect
-      #pp collector.report
     end
 
   end
@@ -208,7 +216,7 @@ describe MetricCollectionInstance do
     before do
       @metric_class = Class.new(Critical::MetricBase)
       @metric_class.metric_name = :df
-      @metric_instance = @metric_class.new
+      @metric_instance = @metric_class.new(@metric_spec)
       @metric_class.monitors(:filesystem)
       @metric_class.collects { :no_op_for_testing }
 
@@ -219,7 +227,8 @@ describe MetricCollectionInstance do
       report_during_collection = nil
       now = Time.new
       Time.stub(:new).and_return(now)
-      monitor = @metric_class.new { report_during_collection = report }
+      @metric_spec.processing_block = Proc.new { report_during_collection = report }
+      monitor = @metric_class.new(@metric_spec)
       collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
       collector.collect
       report_during_collection.collected_at.should == now
@@ -228,35 +237,40 @@ describe MetricCollectionInstance do
     describe "classifying the state of the monitored property" do
 
       it "reports expectation failures as critical" do
-        monitor = @metric_class.new { expect {false} }
+        @metric_spec.processing_block = Proc.new { expect {false} }
+        monitor = @metric_class.new(@metric_spec)
         collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
         collector.collect
         collector.metric_status.should == :critical
       end
 
       it "reports expectation failures as warning when given :warning as the argument" do
-        monitor = @metric_class.new { expect(:warning) {false} }
+        @metric_spec.processing_block = Proc.new { expect(:warning) {false} }
+        monitor = @metric_class.new(@metric_spec)
         collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
         collector.collect
         collector.metric_status.should == :warning
       end
 
       it "reports results as critical" do
-        monitor = @metric_class.new { critical {true} }
+        @metric_spec.processing_block = Proc.new { critical {true} }
+        monitor = @metric_class.new(@metric_spec)
         collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
         collector.collect
         collector.metric_status.should == :critical
       end
 
       it "reports results as warning" do
-        monitor = @metric_class.new { warning {true} }
+        @metric_spec.processing_block = Proc.new { warning {true} }
+        monitor = @metric_class.new(@metric_spec)
         collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
         collector.collect
         collector.metric_status.should == :warning
       end
 
       it "does not de-escalate results to warning after they've been set to critical" do
-        monitor = @metric_class.new { critical {true}; warning {true} }
+        @metric_spec.processing_block = Proc.new { critical {true}; warning {true} }
+        monitor = @metric_class.new(@metric_spec)
         collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
         collector.collect
         collector.metric_status.should == :critical
@@ -264,26 +278,30 @@ describe MetricCollectionInstance do
 
       it "sets the status to critical when collection fails" do
         @metric_class.collects { raise Exception, "your collection is fail"}
-        monitor = @metric_class.new { result }
+        @metric_spec.processing_block = Proc.new { result }
+        monitor = @metric_class.new(@metric_spec)
         collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
         collector.collect
         collector.metric_status.should == :critical
       end
 
       it "sets the status to critical when processing fails" do
-        monitor = @metric_class.new { raise Exception, "an example exception" }
+        @metric_spec.processing_block = Proc.new { raise Exception, "an example exception" }
+        monitor = @metric_class.new(@metric_spec)
         collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
         collector.collect
         collector.metric_status.should == :critical
       end
 
       it "rescues errors in the assertion block and sets the status to warning/critical" do
-        monitor = @metric_class.new { warning {nil.no_method_error} }
+        @metric_spec.processing_block = Proc.new { warning {nil.no_method_error} }
+        monitor = @metric_class.new(@metric_spec)
         collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
         collector.collect
         collector.metric_status.should == :warning
 
-        monitor = @metric_class.new { critical {nil.no_method_error} }
+        @metric_spec.processing_block = Proc.new { critical {nil.no_method_error} }
+        monitor = @metric_class.new(@metric_spec)
         collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
         collector.collect
         collector.metric_status.should == :critical
@@ -291,13 +309,15 @@ describe MetricCollectionInstance do
 
       it "supports rspec for making assertions about values" do
         value = nil
-        monitor = @metric_class.new { expect {value.should be_nil } }
+        @metric_spec.processing_block = Proc.new { expect {value.should be_nil } }
+        monitor = @metric_class.new(@metric_spec)
         collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
         collector.collect
         collector.metric_status.should == :ok
 
         value = nil
-        monitor = @metric_class.new {expect {value.should_not be_nil}}
+        @metric_spec.processing_block = Proc.new {expect {value.should_not be_nil}}
+        monitor = @metric_class.new(@metric_spec)
 
         collector = @metric_collector_class.new(monitor, @output_handler, @trending_handler)
         collector.collect

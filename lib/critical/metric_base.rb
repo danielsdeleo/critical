@@ -10,6 +10,9 @@ module Critical
   class UnsupportedPlatform < RuntimeError
   end
 
+  class DefaultAttributeAlreadyDefined < RuntimeError
+  end
+
   class MetricBase
 
     class << self
@@ -65,21 +68,24 @@ module Critical
 
     def self.monitors(attribute, opts={})
       monitored_attributes << attribute
-      attr_accessor attribute.to_sym
-      collection_instance_class.monitors_attribute(attribute)
-      define_default_attribute(attribute) unless default_attr_defined?
+      if default_attr_defined?
+        msg =  "#{@default_attr} was previously defined as the default attribute for #{metric_name}.\n"
+        msg << "You can only monitor one attribute per metric. Use a Hash if you need more."
+        raise DefaultAttributeAlreadyDefined, msg
+      end
+      define_default_attribute(attribute)
     end
 
     private
 
     def self.define_default_attribute(attr_name)
-      alias_method(:default_attribute=, "#{attr_name.to_s}=".to_sym)
-      alias_method(:default_attribute,  attr_name.to_sym)
-      default_attr_defined
+      #alias_method(:default_attribute=, "#{attr_name.to_s}=".to_sym)
+      alias_method(attr_name.to_sym,:default_attribute)
+      default_attr_defined(attr_name)
     end
 
-    def self.default_attr_defined
-      @default_attr_defined = true
+    def self.default_attr_defined(attr_name)
+      @default_attr = attr_name
     end
 
     def self.default_attr_defined?
@@ -88,20 +94,36 @@ module Critical
 
     public
 
-    attr_accessor :namespace
-
-    attr_reader :processing_block
+    attr_reader :metric_specification
     attr_reader :report
     attr_reader :metric_status
 
-    def initialize(arg=nil, &block)
-      self.default_attribute= arg if arg && self.respond_to?(:default_attribute=)
-      @processing_block = block
-      @namespace = []
+    def initialize(metric_specification)
+      @metric_specification = metric_specification
+    end
+
+    def default_attribute
+      metric_specification.default_attribute
+    end
+
+    def processing_block
+      metric_specification.processing_block
+    end
+
+    def namespace
+      metric_specification.namespace
+    end
+
+    def default_attribute
+      metric_specification.default_attribute
+    end
+
+    def default_attribute?
+      !!default_attribute
     end
 
     def fqn
-      "/#{namespace.join('/')}/#{self}"
+      metric_specification.fqn
     end
 
     def metric_name
@@ -109,7 +131,7 @@ module Critical
     end
 
     def to_s
-      if respond_to?(:default_attribute)
+      if default_attribute?
         metric_name.to_s + "(#{default_attribute})"
       else
         metric_name.to_s

@@ -1,16 +1,22 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
+module TestHarness
+  class MetricForMonitorRunnerSpec < Critical::MetricBase
+    self.metric_name = :process_count
+    monitors :processes_by_name
+
+    collects { :collected }
+
+  end
+end
+
 describe MonitorRunner do
   before do
     MonitorCollection.instance.reset!
-    @metric_class = Class.new(Critical::MetricBase)
-    @metric_class.metric_name = :process_count
-    @metric_class.monitors(:processes_by_name)
-    @monitor = @metric_class.new("unicorn")
+    @metric_spec = MetricSpecification.new(TestHarness::MetricForMonitorRunnerSpec, "unicorn", %w[appservers], Proc.new {})
     
-    @monitor.namespace = %w[appservers]
-    puts @monitor.fqn
-    MonitorCollection.instance.push(@monitor)
+    puts @metric_spec.fqn
+    MonitorCollection.instance.push(@metric_spec)
 
     @ipc = ProcessManager::IPCData.new(nil, nil)
   end
@@ -21,7 +27,9 @@ describe MonitorRunner do
   end
 
   it "looks up a monitor in the collection" do
-    @monitor.should_receive(:collect)
+    @metric = @metric_spec.new_metric
+    @metric_spec.stub!(:new_metric).and_return(@metric)
+    @metric.should_receive(:collect)
     runner = MonitorRunner.new(@ipc)
     runner.run_monitor("/appservers/process_count(unicorn)")
   end

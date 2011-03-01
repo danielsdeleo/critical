@@ -33,7 +33,7 @@ describe DSL::MetricDSL do
     
     it "evaluates the block as a class body" do
       @value_in_closure.should == Critical::Metrics::Squishiness
-      @new_metric.new.should respond_to(:this_should_be_an_instance_method)
+      @new_metric.new(nil).should respond_to(:this_should_be_an_instance_method)
     end
     
     it "sets the metric name on the collector class" do
