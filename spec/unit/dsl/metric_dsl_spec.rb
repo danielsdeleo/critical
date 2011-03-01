@@ -28,7 +28,7 @@ describe DSL::MetricDSL do
     
     it "creates a new metric collector class" do
       @new_metric.should be_an_instance_of(Class)
-      @new_metric.should < Critical::Monitor
+      @new_metric.should < Critical::MetricBase
     end
     
     it "evaluates the block as a class body" do

@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe MetricCollectionInstance do
   before do
-    @metric_class = Class.new(Critical::Monitor)
+    @metric_class = Class.new(Critical::MetricBase)
     @output_handler = OutputHandler::Deferred.new(nil)
     @monitor = @metric_class.new
     @graphite_connection = mock("GraphiteHandler (mocked)")
@@ -27,7 +27,7 @@ describe MetricCollectionInstance do
 
   describe "defining reporting methods" do
     before do
-      @metric_class = Class.new(Critical::Monitor)
+      @metric_class = Class.new(Critical::MetricBase)
       @metric_class.collects { 'the answer is 42'}
       @monitor = @metric_class.new
       @metric_collection_instance = @metric_collector_class.new(@monitor, @output_handler, @trending_handler)
@@ -181,7 +181,7 @@ describe MetricCollectionInstance do
 
   describe "tracking the value of a metric" do
     before do
-      @metric_class = Class.new(Critical::Monitor)
+      @metric_class = Class.new(Critical::MetricBase)
       @metric_class.metric_name = :disk_utilization
       @metric_class.monitors(:filesystem)
       @metric_class.collects { :no_op_for_testing }
@@ -206,7 +206,7 @@ describe MetricCollectionInstance do
 
   describe "reporting the results of collection" do
     before do
-      @metric_class = Class.new(Critical::Monitor)
+      @metric_class = Class.new(Critical::MetricBase)
       @metric_class.metric_name = :df
       @metric_instance = @metric_class.new
       @metric_class.monitors(:filesystem)

@@ -12,7 +12,7 @@ describe MonitorCollection do
   
   describe "adding metrics to the collection" do
     before do
-      @metric_class = Class.new(Critical::Monitor)
+      @metric_class = Class.new(Critical::MetricBase)
       @metric_class.metric_name = :df
       @metric_class.monitors(:filesystem)
       @metric_class.collects { :no_op_for_testing }
@@ -58,7 +58,7 @@ describe MonitorCollection do
   
   describe "enumerating over the monitors in the collection" do
     before do
-      @metric_class = Class.new(Critical::Monitor)
+      @metric_class = Class.new(Critical::MetricBase)
       @metric_class.metric_name = :df
       @metric_class.monitors(:filesystem)
       @foo_monitor = @metric_class.new

@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 describe MonitorRunner do
   before do
     MonitorCollection.instance.reset!
-    @metric_class = Class.new(Critical::Monitor)
+    @metric_class = Class.new(Critical::MetricBase)
     @metric_class.metric_name = :process_count
     @metric_class.monitors(:processes_by_name)
     @monitor = @metric_class.new("unicorn")

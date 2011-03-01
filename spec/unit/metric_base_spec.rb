@@ -1,8 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
-describe Monitor do
+describe MetricBase do
   before do
-    @metric_class = Class.new(Critical::Monitor)
+    @metric_class = Class.new(Critical::MetricBase)
   end
 
   it "keeps a collect string" do
@@ -41,7 +41,7 @@ describe Monitor do
 
   describe "defining reporting methods" do
     before do
-      @metric_class = Class.new(Critical::Monitor)
+      @metric_class = Class.new(Critical::MetricBase)
       @metric_class.metric_name = "reporting_methods_test_#{rand(200)}"
       @metric_class.collects { 'the answer is 42'}
       @monitor = @metric_class.new
@@ -91,7 +91,7 @@ describe Monitor do
 
   describe "defining attributes" do
     before do
-      @metric_class = Class.new(Critical::Monitor)
+      @metric_class = Class.new(Critical::MetricBase)
       @metric_class.collects "df -k"
       @metric_class.metric_name = :df
       @metric_instance = @metric_class.new

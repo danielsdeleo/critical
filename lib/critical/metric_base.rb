@@ -10,7 +10,7 @@ module Critical
   class UnsupportedPlatform < RuntimeError
   end
 
-  class Monitor
+  class MetricBase
 
     class << self
       attr_accessor :metric_name

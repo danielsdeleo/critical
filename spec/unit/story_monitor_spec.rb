@@ -87,7 +87,7 @@ end
 
 describe StoryMonitor::Step do
   before do
-    @metric = Class.new(Critical::Monitor)
+    @metric = Class.new(Critical::MetricBase)
     @metric.metric_name = :browser
     @metric.monitors(:base_url)
     @monitor = @metric.new
