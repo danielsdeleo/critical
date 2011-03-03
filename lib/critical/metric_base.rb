@@ -96,7 +96,7 @@ module Critical
     # of a metric collection. See +reports+
     def self.add_reporting_method(name, &method_body)
       define_method(name.to_sym) do
-        instance_eval(&method_body)
+        @memoized_results[name] ||= instance_eval(&method_body)
       end
     end
 
@@ -107,8 +107,10 @@ module Critical
     # See +reports+ and <tt>#coerce</tt>
     def self.add_reporting_method_with_coercion(name, desired_class, &method_body)
       define_method(name) do
-        uncoerced_value = instance_eval(&method_body)
-        coerce(uncoerced_value, desired_class)
+        @memoized_results[name] ||= begin
+          uncoerced_value = instance_eval(&method_body)
+          coerce(uncoerced_value, desired_class)
+        end
       end
     end
 
@@ -144,6 +146,7 @@ module Critical
     def initialize(metric_specification)
       @metric_specification = metric_specification
       @metric_status = :ok
+      @memoized_results = {}
     end
 
     def namespace

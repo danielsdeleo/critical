@@ -107,6 +107,15 @@ describe MetricBase do
       @metric.collect(@output_handler, nil)
       @metric.answer.should == ['42']
     end
+
+    it "memoizes the result of report methods" do
+      @metric_class.reports(:counter) do
+        @call_count ||= 0
+        @call_count += 1
+      end
+      @metric.counter.should == 1
+      @metric.counter.should == 1
+    end
   end
 
   describe "defining attributes" do
