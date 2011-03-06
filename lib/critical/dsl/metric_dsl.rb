@@ -13,7 +13,7 @@ module Critical
         MonitorDSL.define_metric(metric_name, metric_collector)
         metric_collector
       end
-    
+
     end
   end
 end
