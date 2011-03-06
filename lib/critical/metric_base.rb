@@ -13,6 +13,99 @@ module Critical
   class DefaultAttributeAlreadyDefined < RuntimeError
   end
 
+  # == Critical::MetricBase
+  # The base class for all metrics. In the DSL, new subclasses will
+  # usually be created by calling +MetricDSL#Metric+ (included at the
+  # top level, so you can just call +Metric+).
+  # === Defining a metric via the DSL
+  # To define a metric via the DSL, call +Metric+ with the name of the
+  # metric as the argument, passing a block:
+  #
+  #   Metric(:disk_utilization) do
+  #   end
+  #
+  # === Arugments
+  # Metrics can have an argument, such as a URL to hit, the name of a
+  # disk partition to monitor, etc. To define this argument, call
+  # +monitors+ in the block passed to +Metric+:
+  #
+  #   Metric(:nginx_stats) do
+  #     monitors :nginx_status_url
+  #   end
+  #
+  # === Collecting Data
+  # Data can be collected either by executing ruby code or running an
+  # external shell command. In both cases, the collection process is
+  # defined by calling +collects+. To collect data from a shell command,
+  # give a string argument to +collects+:
+  #
+  #   Metric(:network_connections) do
+  #     collects "netstat -n -f inet"
+  #   end
+  #
+  # To collect data by running ruby code, pass a code block to
+  # +collects+:
+  #
+  #   Metric(:nginx_stats) do
+  #     collects do
+  #       RestClient.get("http://127.0.0.1/nginx_status")
+  #     end
+  #   end
+  #
+  # === Processing Data
+  # In the typical case, collection code should only aquire the raw
+  # data for the metric. Data processing is handled by separate
+  # reporting methods. To add a reporting method, call +reports+ with
+  # the name of the report and a code block. Within the code block, use
+  # +result+ to get the result of the data collection:
+  #
+  #   Metric(:network_connections) do
+  #     collects "netstat -n -f inet"
+  #
+  #     reports(:count) do
+  #       result.split("\n").size
+  #     end
+  #   end
+  #
+  # ==== Type Coercion
+  # To ensure that the result of a report is of a given class of ruby
+  # object, you can pass a Hash of the form <tt>:name => :type</tt> to
+  # +reports+. Type coercion uses ruby's capitalized coercion methods
+  # (e.g, Array, Integer, String, Float) which are more forgiving than
+  # the +Object#to_type+ methods.
+  #
+  #   Metric(:load_average) do
+  #     collects "uptime"
+  #
+  #     reports(:one_minute_avg => :float) do
+  #       result.match(/load averages: ([\d.]+)/)[1]
+  #     end
+  #   end
+  #
+  # === Reporting Rates from Counter Data
+  # Frequently, data will be reported via counters when you are
+  # interested in a rate or average over a certain period. Critical's
+  # design makes it impossible to store the previous results in memory,
+  # so a filesystem-based key-value store is provided to persist data
+  # between collection occurences. To get a DataStash object, call
+  # +data+. Use +save+ and +load+ to store and fetch data:
+  #
+  #   Metric(:nginx_stats) do
+  #     # collection code...
+  #
+  #     reports(:request_counter) do
+  #       request_count = extract_request_count # defined elsewhere...
+  #       stash.save( :timestamp => Time.now.to_i,
+  #                   :count => request_count )
+  #     end
+  #
+  #     reports(:prior_request_counter) do
+  #       stash.load
+  #       # returns the data stored last time, e.g.,
+  #       # => {:timestamp => 1299447493, :count => 1234}
+  #     end
+  #   end
+  #
   class MetricBase
     include RSpec::Matchers
     include DataStashDSL
@@ -203,6 +296,12 @@ module Critical
       end
     end
 
+    # Returns the fully qualified name of the metric, but with all
+    # non-shell safe characters removed. The namespace path is joined
+    # with dots. For example, a +df+ metric, with a default attribute
+    # "/var", in namespace system/hostname/disk_usage, would have
+    # this +safe_str+:
+    #   system.hostname.disk_usage.df-var
     def safe_str
       name_component = metric_name.to_s
       name_component << "-#{default_attribute.gsub(%r{[^\w]}, '')}" if default_attribute?
@@ -217,6 +316,9 @@ module Critical
       @metadata
     end
 
+    # Initiates collection and processing of the metric, with reports
+    # and trending data (if any) being sent to +reporting_handler+ and
+    # +trending_handler+ respectively. Not usually called by user code.
     def collect(reporting_handler, trending_handler)
       @output_handler, @trending_handler = reporting_handler, trending_handler
 
@@ -226,10 +328,19 @@ module Critical
       run_processing_block
     end
 
+    # Returns the result of running the collection command or code
+    # block (generally defined by the +collects+ method in the class
+    # body). The return value is memoized for each data collection run,
+    # so you can call this multiple times and it will be
+    # calculated/collected only once.
     def result
       @result ||= run_collection_command_or_block
     end
 
+    # Sends the result of calling the method +what+ to the trending
+    # handler (graphite/carbon). For example, if your metric has a
+    # method +requests_per_second+ that you want to graph, you write:
+    #   track(:requests_per_second)
     def track(what)
       trending_handler.write_metric(what, send(what), self)
     end

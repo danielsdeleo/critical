@@ -17,6 +17,8 @@
   * check return code for run-once mode
 
 ## TODO ##
+* allow plugins and config declare gem deps, automate installing them.
+  (probably bundler)
 * Option to print the config in summary form for troubleshooting complex
   configs
 * CLI client to submit a task to the queue manually
