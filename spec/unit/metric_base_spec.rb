@@ -149,16 +149,23 @@ describe MetricBase do
       @metric_class.new(@metric_specification).to_s.should == "df(/tmp)"
     end
 
+    it "converts itself to a 'safe' string with no slash or paren chars" do
+      @metric_specification.default_attribute = "/tmp"
+      @namespace.concat [:foo, "bar", :baz]
+      @metric = @metric_class.new(@metric_specification)
+      @metric.safe_str.should == 'foo.bar.baz.df-tmp'
+    end
+
     it "has a namespace" do
       @namespace.concat [:foo, "bar", :baz]
       @metric.namespace.should == [:foo, "bar", :baz]
     end
-    
+
     it "generates a fully qualified name from its namespace" do
       @metric_specification.namespace = [:foo, "bar", :baz]
       @metric_specification.default_attribute = "/tmp"
       instance = @metric_class.new(@metric_specification)
-    
+
       instance.fqn.should == "/foo/bar/baz/df(/tmp)"
     end
 

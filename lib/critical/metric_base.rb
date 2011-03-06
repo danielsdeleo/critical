@@ -1,3 +1,5 @@
+require 'critical/data_stash'
+
 module Critical
   module Metrics
   end
@@ -11,18 +13,9 @@ module Critical
   class DefaultAttributeAlreadyDefined < RuntimeError
   end
 
-  # == DynamicMetricCollectionInstance
-  # Each type of metric will create its own subclass of MetricCollectionInstance
-  # These subclasses usually have methods added at runtime so you can conveniently
-  # access the results of a metric collection. (See <tt>Critical::Monitor.reports</tt>)
-  #
-  # These dynamically generated classes will be named after their metrics and
-  # "stored" in the DynamicMetricCollectionInstance namespace.
-  module DynamicMetricCollectionInstance
-  end
-
   class MetricBase
     include RSpec::Matchers
+    include DataStashDSL
 
     STATUSES = {:ok => 0, :warning => 1, :critical => 2}
 
@@ -208,6 +201,12 @@ module Critical
       else
         metric_name.to_s
       end
+    end
+
+    def safe_str
+      name_component = metric_name.to_s
+      name_component << "-#{default_attribute.gsub(%r{[^\w]}, '')}" if default_attribute?
+      (namespace << name_component).join('.')
     end
 
     def metadata
