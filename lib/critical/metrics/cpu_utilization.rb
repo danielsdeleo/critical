@@ -1,9 +1,9 @@
 Metric(:cpu_utilization) do
 
-  CPU_USAGE_TYPES = { 2   => 'usr', 
-                      3   => 'nice', 
-                      4   => 'sys', 
-                      5   => 'iowait', 
+  CPU_USAGE_TYPES = { 2   => 'usr',
+                      3   => 'nice',
+                      4   => 'sys',
+                      5   => 'iowait',
                       6   => 'irq',
                       7   => 'soft',
                       8   => 'steal',
@@ -17,7 +17,7 @@ Metric(:cpu_utilization) do
     reports(:percent_used => :float) do
       result.lines.map(&:to_f).inject(:+)
     end
-    
+
   when /linux/
 
     # NOTE: using mpstat for now, which means you need to install the sysstat package.
@@ -27,12 +27,12 @@ Metric(:cpu_utilization) do
     ## mpstat example
     #  mpstat -P ALL 1 1
     #  Linux 2.6.32-21-generic (ubuntu) 	02/27/2011 	_x86_64_	(2 CPU)
-    #  
+    #
     #  04:08:48 PM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest   %idle
     #  04:08:49 PM  all    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
     #  04:08:49 PM    0    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
     #  04:08:49 PM    1    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
-    #  
+    #
     #  Average:     CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest   %idle
     #  Average:     all    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
     #  Average:       0    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
@@ -60,6 +60,6 @@ Metric(:cpu_utilization) do
 
   else # TODO :(
     raise UnsupportedPlatform, "cpu_utilization does not have an implementation for your platform yet :("
-  end 
-  
+  end
+
 end
