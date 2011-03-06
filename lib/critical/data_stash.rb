@@ -33,6 +33,7 @@ module Critical
         f.puts(Marshal.dump({:hack => data}))
         f.fsync
       end
+      data
     end
 
     def load
@@ -40,6 +41,8 @@ module Critical
         f.flock(File::LOCK_SH)
         Marshal.load(f.read)[:hack]
       end
+    rescue Errno::ENOENT
+      nil
     end
 
   end

@@ -38,6 +38,10 @@ describe DataStash do
     pid, status = Process.waitpid2(other_process)
     status.exitstatus.should == 0
   end
+
+  it "returns nil if there is no data yet" do
+    @data_stash.load.should be_nil
+  end
 end
 
 describe DataStashDSL do
