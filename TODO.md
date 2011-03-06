@@ -1,17 +1,24 @@
 # TODOs and Maybes #
 
 ## TODO NOW ##
-* fix the relationship between metrics, monitors, and metric\_collection\_instances.
-  currently metrics are collected in metric\_collection\_instances, but you can't
-  define methods there. not-so-cool workaround is in the cluster metric
+* Load data from configuration dir:
+  * plain text => array of lines
+  * json => Hash
+  * something like config\_data[:filename] # => [Array|Hash]
 * message sending needs to IO.select(nil,[writers],nil, timeout) so it doesn't
   deadlock if all the workers are dead/busy
 * retries after respawning workers in the above scenario
-* reimplement scheduling (linked list?)
+* optimize scheduler
 * finish integration between output handling and new expectation system
-* integrate ohai so you can have auto-monitors (e.g., loop over all available disks)
+* allow state between tests using flock'd files
+* run a single file and exit
+  * return code non-zero for failure
+  * show the results in a pretty format
+  * check return code for run-once mode
 
 ## TODO ##
+* Option to print the config in summary form for troubleshooting complex
+  configs
 * CLI client to submit a task to the queue manually
 * figure out stable protocol so other programs/libs/langs can submit jobs to the queue
 * test/run once mode: run individual metrics sequentially in single process and exit
@@ -19,24 +26,21 @@
   probably a second socket to "write back" to the scheduler with status updates
 * debug method within monitors, take a block and pp the output when verbosity is on for collection
 * Finish "story mode"
-* live code reloading
 * manpages (ronn)
-* instantiate metrics from serializable data
 
 ## Maybe ##
-* use kgio instead of the built-ins.
+* integrate ohai so you can have auto-monitors (e.g., loop over all available disks)
+* instantiate metrics from serializable data
+* live code reloading
 * log file load/search tool for ruby formatted logs -- a simple library to do that, plus irb wrapping
-* conf.d/ system, load .rb files from it?
+* use kgio instead of the built-ins.
 * json or yaml files support (for integration w/ cfg mgrs)
 * privilege separation, run some workers as root, others not.
  
 ## STDLIB ##
-Should focus on full stack testing where sensible:
+Support story mode by builing primitives for full stack testing where sensible.
 
 * load avg
-# CPU
-* df
-* free mem
 * network i/o
 * disk i/o
 * REST (HTTP verbs)
