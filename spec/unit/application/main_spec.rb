@@ -66,13 +66,13 @@ describe Application::Main do
       @main.init_self_pipe
       @main.awaken
       @main.sleep(10)
-      (Time.now - start).should be_close(0, 1)
+      (Time.now - start).should be_within(1).of(0)
     end
 
     it "runs the scheduler" do
       scheduler = mock("Scheduler", :time_until_next_task => 5)
       @main.stub!(:scheduler).and_return(scheduler)
-      @main.should_receive(:sleep).and_return(true)
+      @main.should_receive(:sleep).and_return(nil)
       Application::Main::ACTION_QUEUE << nil
 
       scheduler.should_receive(:each)

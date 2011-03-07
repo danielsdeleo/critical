@@ -98,7 +98,7 @@ module Critical
           when nil
             sleep_time = scheduler.time_until_next_task
             log.debug { "sleeping #{sleep_time} seconds until next tasks are due" }
-            sleep(sleep_time)
+            redo if sleep(sleep_time)
             enqueue_monitor_tasks
             process_manager.manage_workers
           else
