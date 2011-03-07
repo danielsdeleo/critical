@@ -43,21 +43,21 @@ module Critical
         spawn_workers
         run_main_loop
       end
-      
+
       def configure
         Configuration.configure!
       end
-      
+
       def load_sources
         config.source_files.each do |source_file|
           FileLoader.load_metrics_and_monitors_in(source_file)
         end
       end
-      
+
       def daemonize!
         Daemon.daemonize(:pidfile => config.pidfile)
       end
-      
+
       def daemonizing?
         config.daemonize?
       end
@@ -71,7 +71,7 @@ module Critical
           trap(signal) { ACTION_QUEUE.unshift(signal); awaken}
         end
       end
-      
+
       def spawn_workers
         log.info { "starting workers" }
         process_manager.start_ipc
@@ -138,23 +138,23 @@ module Critical
       def process_manager
         ProcessManager.instance
       end
-      
+
       private
-      
+
       def monitor_collection
         MonitorCollection.instance
       end
-      
+
       def config
         Critical.config
       end
-      
+
       # Run a sanity check on the config. Must run after loading files to
       # correctly detect empty monitor collection
       def validate_config
         config.validate_configuration!
       end
-      
+
     end
   end
 end

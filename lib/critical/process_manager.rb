@@ -125,7 +125,7 @@ module Critical
         # if it can be reaped, it must have crashed
         if result = Process.waitpid2(child_pid, Process::WNOHANG)
           log.error { "worker process #{worker_data.worker_id} pid: #{child_pid} crashed"}
-          dead_pids << child_pid 
+          dead_pids << child_pid
         elsif  timed_out?(worker_data)
           kill_and_reap(child_pid)
           dead_pids << child_pid
@@ -168,7 +168,7 @@ module Critical
     end
 
   end
-  
+
 
   # == Critical::Subprocess
   # Mixin to be included into worker classes
@@ -205,7 +205,7 @@ module Critical
       loop do
 
         ipc.heartbeat_file.alive!
-        
+
         # accept connections from sockets with pending connections
         ready_sockets.each do |socket|
           accept_connections(socket) { |dequeued_task| yield dequeued_task }
@@ -257,5 +257,5 @@ module Critical
     end
 
   end
-  
+
 end

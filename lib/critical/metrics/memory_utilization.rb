@@ -7,11 +7,11 @@ Metric(:memory_utilization) do
     total_memory_in_bytes = `sysctl -n hw.memsize`.strip.to_i
 
     vm_stat_format = /^Pages free:[\s]+([\d]+)\.$/
-  
+
     reports(:pages_free => :integer) do
       result.line(1).fields(vm_stat_format).field(0)
     end
-  
+
     reports(:bytes_free => :integer) do
       pages_free * pagesize
     end
