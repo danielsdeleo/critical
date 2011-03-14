@@ -41,7 +41,7 @@ module Critical
         @source_files   = []
         @daemonize      = nil
         @continuous     = nil
-        @eval_line_no   = nil
+        @data_dir       = nil
       end
 
       def configure
@@ -76,6 +76,10 @@ module Critical
       option "Load config data from the directory", :short => :d, :arg => 'DIRECTORY'
       def data_dir=(directory)
         @data_dir = File.expand_path(directory)
+      end
+
+      def data_dir
+        Array( @data_dir )
       end
 
       option "The configuration file to use", :short => :c
@@ -148,7 +152,7 @@ module Critical
           self.flash_notice = "The configuration file you specified: #{config_file} #{reason}"
           help
         else
-          log.debug { "No config file specified." }
+          log.info { "No config file specified." }
         end
       end
 
