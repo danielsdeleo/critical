@@ -41,7 +41,7 @@ module Critical
         @source_files   = []
         @daemonize      = nil
         @continuous     = nil
-        @eval_line_no   = nil
+        @data_dir       = nil
       end
 
       def configure
@@ -71,6 +71,15 @@ module Critical
       option "Load the given source file or directory", :short => :r, :arg => "[directory|file]"
       def require(file_or_dir)
         @source_files << File.expand_path(file_or_dir)
+      end
+
+      option "Load config data from the directory", :short => :d, :arg => 'DIRECTORY'
+      def data_dir=(directory)
+        @data_dir = File.expand_path(directory)
+      end
+
+      def data_dir
+        Array( @data_dir )
       end
 
       option "The configuration file to use", :short => :c
@@ -124,13 +133,6 @@ module Critical
         @graphite_port || 2003
       end
 
-      option "A sting of ruby code to evaluate", :short => :e, :arg => :code
-      def eval(ruby_code)
-        @eval_line_no ||= 0
-        @eval_line_no += 1
-        Kernel.eval(ruby_code, TOPLEVEL_BINDING, "-e command line option", @eval_line_no)
-      end
-
       # Yields a block to OutputHandler::Dispatcher.configure
       def reporting(&block)
         OutputHandler::Dispatcher.configure(&block)
@@ -150,7 +152,7 @@ module Critical
           self.flash_notice = "The configuration file you specified: #{config_file} #{reason}"
           help
         else
-          log.debug { "No config file specified." }
+          log.info { "No config file specified." }
         end
       end
 

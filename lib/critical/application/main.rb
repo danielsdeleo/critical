@@ -19,6 +19,7 @@ module Critical
 
       def run
         configure
+        load_config_data
         log.info {"Critical is starting up, current PID: #{Process.pid}"}
         load_sources
         validate_config
@@ -46,6 +47,10 @@ module Critical
 
       def configure
         Configuration.configure!
+      end
+
+      def load_config_data
+        DSL::ConfigData.load_config_data_from(config.data_dir)
       end
 
       def load_sources

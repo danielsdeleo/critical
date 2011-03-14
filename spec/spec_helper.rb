@@ -12,4 +12,6 @@ end
 
 include Critical
 
+FIXTURES_DIR = File.expand_path("../fixtures", __FILE__)
+
 Critical.config.log_level = :fatal
