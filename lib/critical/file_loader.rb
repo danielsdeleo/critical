@@ -65,6 +65,7 @@ module Critical
 
     METRIC_PATH_SPEC = /(#{Regexp.escape 'critical/metrics/'}(.+))\.rb/
     #' fix syntax highlighting in vim :(
+
     METRIC_REQUIRE_PATHS = {}
 
     def add_library_metric(path)

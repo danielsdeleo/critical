@@ -64,6 +64,7 @@ module Critical
   # the 'roles' example, you could access the roles data as
   # `config_data[:roles]`.
   class ConfigData
+    include Enumerable
 
     class PlainTextParser
       COMMENT = /^(?:[\s]*)#/
@@ -101,8 +102,36 @@ module Critical
       @config_data[data_item.to_s]
     end
 
+    def fetch(data_item, &block)
+      @config_data.fetch(data_item, &block)
+    end
+
+    def key?(data_item)
+      @config.key?(data_item)
+    end
+
+    alias :include? :key?
+    alias :has_key? :key?
+    alias :member? :key?
+
+    def value?(val)
+      @config.value?(val)
+    end
+
+    alias :has_value? :value?
+
     def keys
       @config_data.keys
+    end
+
+    def length
+      @config_data.length
+    end
+
+    alias :size :length
+
+    def each(&block)
+      @config_data.each(&block)
     end
 
     private
