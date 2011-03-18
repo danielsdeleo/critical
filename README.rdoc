@@ -2,8 +2,8 @@
 Monitoring should be a layer in the stack, not an application.
 
 = Installing
-gem install rspec git clone
-git://github.com/danielsdeleo/critical.git
+gem install rspec
+git clone git://github.com/danielsdeleo/critical.git
 
 = Manifesto
 Critical is my take on network/infrastructure monitoring. Here are the big
@@ -119,5 +119,6 @@ Initial work focused on the alerting half of the alerting/trending combo that
 comprises "monitoring." I've pivoted and am currently focusing on making it dead
 simple to get data into graphite. Alerting is still a long term priority.
 
-= License and Copyright Distributed under the terms of the Apache 2.0 license.
+= License and Copyright 
+Distributed under the terms of the Apache 2.0 license.
 (c) 2010,2011 Daniel DeLeo
