@@ -17,7 +17,7 @@ require 'typhoeus'
 
 Metric(:nginx_requests) do
 
-  monitors(:status_url, :validate => /\/.*/, :required => true)
+  monitors(:status_url)
 
   collects do
     req = Typhoeus::Request.get(status_url)

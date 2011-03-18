@@ -2,21 +2,122 @@
 Monitoring should be a layer in the stack, not an application.
 
 = Installing
-  gem install rspec
-  git clone git://github.com/danielsdeleo/critical.git
-
-= Configuring and Running
-See bin/critical --help and the examples directory
+gem install rspec git clone
+git://github.com/danielsdeleo/critical.git
 
 = Manifesto
-Critical is my take on network/infrastructure monitoring. Here are the big ideas:
-* Infrastructure as code: The monitoring system should be an internal DSL so it can natively interact with any part of your infrastructure you can find or write a library for. You should also be able to productively alter its guts if you need to. This is a monitoring system for ops people who write code and coders who do ops.
+Critical is my take on network/infrastructure monitoring. Here are the big
+ideas:
+
+* Infrastructure as code: The monitoring system should be an internal DSL so it
+  can natively interact with any part of your infrastructure you can find or
+  write a library for. You should also be able to productively alter its guts if
+  you need to. This is a monitoring system for ops people who write code and
+  coders who do ops.
+* Client-based: This scales better, and is actually easier to configure if you
+  use configuration management, which you should be doing anyway.
 * Declarative: Declare what the state of your system is supposed to be.
-* Alerting and Trending together: a client/agent can do both of these at the same time with less configuration overhead. It makes sense to keep them separate on the server side.
-* Licensing: "Do what thou wilt shall be the whole of the law," except for patent trolls, etc. So, Apache 2.0 it is.
+* Alerting and Trending together: a client/agent can do both of these at the
+  same time with less configuration overhead. It makes sense to keep them
+  separate on the server side.
+* Licensing: "Do what thou wilt shall be the whole of the law," except for
+  patent trolls, etc. So, Apache 2.0 it is.
+
+= Design
+Critical runs as a cluster of daemons. The master process does the scheduling
+and assigns tasks to workers by communicating over a UNIX domain socket. The
+workers listen to the socket and process tasks as they come. I had also
+considered an evented architecture (using eventmachine), but that had the
+drawback of requiring users to write plugins using only EM-based libraries or
+risk running into problems with blocking IO.
+
+== Metric DSL
+Critical provides a DSL for writing metric gathering code. It looks like this:
+
+  Metric(:memory_utilization) do
+    case RUBY_PLATFORM
+    when /darwin/
+      # omitted...
+
+    when /linux/
+
+      collects 'free -b'
+
+      reports(:total_memory_in_kb => :int) do
+        result.line(1).split[1]
+      end
+
+      reports(:bytes_used => :int) do
+        result.line(2).split[2]
+      end
+
+    else
+      raise UnsupportedPlatform, "memory_utilization does not have an implementation for your platform yet :("
+    end
+
+    reports(:kb_free => :integer) do
+      bytes_free / 1024
+    end
+
+    reports(:kb_used => :integer) do
+      pp :kb_used => (bytes_used / 1024)
+      bytes_used / 1024
+    end
+
+    reports(:mb_free => :float) do
+      kb_free / 1024.0
+    end
+
+    reports(:mb_used => :float) do
+      kb_used.to_f / 4.0
+    end
+
+  end
+
+== Using Metrics
+To configure critical to monitor your metrics, you use the monitor DSL:
+
+  require_metric 'disk_utilization'
+  require_metric 'memory_utilization'
+  require_metric 'cpu_utilization'
+  require_metric 'cluster'
+
+  # Monitors are also where you define your scheduling.
+  Monitor(:system) do
+
+    # Monitor statements can be nested, this nesting will be included in the
+    # collected data for tracking/tagging purposes.
+    Monitor(hostname) do # includes the hostname in the namespace
+
+      # Specify collection intervals with +every+ or +collect_every+
+      # The +every+ form takes a block, each monitor you define inside the block
+      # will be scheduled to run at that interval.
+      every(10=>:seconds) do
+
+        disk_utilization('/') { track :percentage }
+
+        memory_utilization { track :bytes_used }
+
+        cpu_utilization {track :percent_used}
+
+        cluster("critical : worker") do |c|
+          c.track :processes
+          c.track :total_cpu
+          c.track :total_rss
+          c.track :uptime
+        end
+
+      end
+    end
+  end
+
+= Running Critical:
+See bin/critical --help and the examples directory
 
 == Project Status
-Initial work focused on the alerting half of the alerting/trending combo that comprises "monitoring." I've pivoted and am currently focusing on making it dead simple to get data into graphite. Alerting is still a long term priority.
+Initial work focused on the alerting half of the alerting/trending combo that
+comprises "monitoring." I've pivoted and am currently focusing on making it dead
+simple to get data into graphite. Alerting is still a long term priority.
 
-= License and Copyright
-Distributed under the terms of the Apache 2.0 license. (c) 2010 Daniel DeLeo
+= License and Copyright Distributed under the terms of the Apache 2.0 license.
+(c) 2010,2011 Daniel DeLeo
