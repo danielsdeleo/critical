@@ -21,7 +21,7 @@ ideas:
 * Continuous verification: Critical has a single shot mode in
   addition to the typical daemonized operation. This allows you to verify the
   configuration on a host after making changes and then continuously monitor the
-  state of the system afterwords
+  state of the system using the same verification tests.
 * Declarative: Declare what the state of your system is supposed to be.
 * Alerting and Trending together: a client/agent can do both of these at the
   same time with less configuration overhead. It makes sense to keep them
