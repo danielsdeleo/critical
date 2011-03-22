@@ -2,7 +2,9 @@
 Monitoring should be a layer in the stack, not an application.
 
 = Installing
+
 gem install rspec
+
 git clone git://github.com/danielsdeleo/critical.git
 
 = Manifesto
@@ -16,6 +18,10 @@ ideas:
   coders who do ops.
 * Client-based: This scales better, and is actually easier to configure if you
   use configuration management, which you should be doing anyway.
+* Continuous verification: Critical has a single shot mode in
+  addition to the typical daemonized operation. This allows you to verify the
+  configuration on a host after making changes and then continuously monitor the
+  state of the system afterwords
 * Declarative: Declare what the state of your system is supposed to be.
 * Alerting and Trending together: a client/agent can do both of these at the
   same time with less configuration overhead. It makes sense to keep them
