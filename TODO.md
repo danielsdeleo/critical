@@ -9,7 +9,6 @@
 * retries after respawning workers in the above scenario
 * optimize scheduler
 * finish integration between output handling and new expectation system
-* allow state between tests using flock'd files
 * run a single file and exit
   * return code non-zero for failure
   * show the results in a pretty format
