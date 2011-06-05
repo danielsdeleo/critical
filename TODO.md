@@ -1,10 +1,6 @@
 # TODOs and Maybes #
 
 ## TODO NOW ##
-* Load data from configuration dir:
-  * plain text => array of lines
-  * json => Hash
-  * something like config\_data[:filename] # => [Array|Hash]
 * message sending needs to IO.select(nil,[writers],nil, timeout) so it doesn't
   deadlock if all the workers are dead/busy
 * retries after respawning workers in the above scenario
