@@ -349,7 +349,7 @@ module Critical
 
     # Sets the state of the metric to +status_on_failure+ (defaults to :critical)
     # if the block evaluates to false or raises an error. Can be used with rspec
-    # matchers if rspec support is enabled. (see Monitor.enable_rspec)
+    # matchers.
     #
     #   expect { 5 >= 0 }             # doesn't update status
     #   expect { 42 < 5 }             # updates status to critical
