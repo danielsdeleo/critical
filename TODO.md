@@ -15,6 +15,9 @@
   * show the results in a pretty format
 
 ## TODO ##
+* allow metrics to be defined with less DSLism
+  (i.e., class MyMetric < Metric::Base should do the necessary
+  bookkeeping)
 * Add primitives for common measurement types
   * counters (like for CPU time/percentage) should be easy
   * timers should be easy
