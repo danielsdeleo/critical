@@ -88,7 +88,7 @@ module Critical
   # design makes it impossible to store the previous results in memory,
   # so a filesystem-based key-value store is provided to persist data
   # between collection occurences. To get a DataStash object, call
-  # +data+. Use +save+ and +load+ to store and fetch data:
+  # +stash+. Use +save+ and +load+ to store and fetch data:
   #
   #   Metric(:nginx_stats) do
   #     # collection code...
@@ -105,6 +105,8 @@ module Critical
   #       # => {:timestamp => 1299447493, :count => 1234}
   #     end
   #   end
+  #
+  # See DataStashDSL for more documentation.
   #
   class MetricBase
     include RSpec::Matchers
