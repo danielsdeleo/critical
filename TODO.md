@@ -9,10 +9,9 @@
 * retries after respawning workers in the above scenario
 * optimize scheduler
 * finish integration between output handling and new expectation system
-* run a single file and exit
+* run once mode:
   * return code non-zero for failure
   * show the results in a pretty format
-  * check return code for run-once mode
 
 ## TODO ##
 * allow plugins and config declare gem deps, automate installing them.
