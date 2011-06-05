@@ -2,13 +2,13 @@
 
 ## TODO NOW ##
 * generalize trending code, don't depend on a running graphite.
+* finish integration between output handling and new expectation system
 * default to a less noisy log format, ruby format was a neat idea but I
   don't like it.
 * message sending needs to IO.select(nil,[writers],nil, timeout) so it doesn't
   deadlock if all the workers are dead/busy
 * retries after respawning workers in the above scenario
 * optimize scheduler
-* finish integration between output handling and new expectation system
 * run once mode:
   * return code non-zero for failure
   * show the results in a pretty format
