@@ -5,6 +5,7 @@
 * finish integration between output handling and new expectation system
 * default to a less noisy log format, ruby format was a neat idea but I
   don't like it.
+* Steal ShellOut from Chef for running external commands
 * message sending needs to IO.select(nil,[writers],nil, timeout) so it doesn't
   deadlock if all the workers are dead/busy
 * retries after respawning workers in the above scenario
@@ -14,6 +15,9 @@
   * show the results in a pretty format
 
 ## TODO ##
+* Add primitives for common measurement types
+  * counters (like for CPU time/percentage) should be easy
+  * timers should be easy
 * allow plugins and config declare gem deps, automate installing them.
   (probably bundler)
 * Option to print the config in summary form for troubleshooting complex
