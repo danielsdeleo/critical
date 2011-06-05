@@ -20,9 +20,10 @@
   configs
 * CLI client to submit a task to the queue manually
 * figure out stable protocol so other programs/libs/langs can submit jobs to the queue
-* test/run once mode: run individual metrics sequentially in single process and exit
-* retry logic on failed expectations (i.e. try again every 1m 5 times after a failure)
-  probably a second socket to "write back" to the scheduler with status updates
+* State Machine
+  * does this go in the client at all?
+  * if implemented in client, probably need to have monitors return
+    result, main loop will need to track the open sockets...
 * debug method within monitors, take a block and pp the output when verbosity is on for collection
 * Finish "story mode"
 * manpages (ronn)
