@@ -336,7 +336,7 @@ describe MetricBase do
 
         @output_handler = OutputHandler::Deferred.new(nil)
       end
-      
+
       context "when a trending handler is provided" do
         it "writes the value to the Graphite connection" do
           @metric_class.reports(:percentage) { 25 }

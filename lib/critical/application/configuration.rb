@@ -114,7 +114,7 @@ module Critical
       def continuous?
         @continuous || false
       end
-      
+
       option "Disable reporting trends to graphite/carbon server"
       def disable_graphite=(disabled = true)
         @disable_graphite = disabled
