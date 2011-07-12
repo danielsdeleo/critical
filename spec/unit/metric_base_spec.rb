@@ -336,15 +336,23 @@ describe MetricBase do
 
         @output_handler = OutputHandler::Deferred.new(nil)
       end
+      
+      context "when a trending handler is provided" do
+        it "writes the value to the Graphite connection" do
+          @metric_class.reports(:percentage) { 25 }
+          @metric_spec.processing_block = Proc.new { track(:percentage) }
+          @metric_spec.namespace = %w[system HOSTNAME]
+          @metric_spec.default_attribute = "/"
 
-      it "writes the value to the Graphite connection" do
-        @metric_class.reports(:percentage) { 25 }
-        @metric_spec.processing_block = Proc.new { track(:percentage) }
-        @metric_spec.namespace = %w[system HOSTNAME]
-        @metric_spec.default_attribute = "/"
+          @graphite_connection.should_receive(:write).with('system.HOSTNAME.disk_utilization.percentage./', 25)
+          @metric.collect(@output_handler, @trending_handler)
+        end
+      end
 
-        @graphite_connection.should_receive(:write).with('system.HOSTNAME.disk_utilization.percentage./', 25)
-        @metric.collect(@output_handler, @trending_handler)
+      context "when no trending handler is provided" do
+        it "continues without error" do
+          lambda { @metric.collect(@output_handler) }.should_not raise_exception
+        end
       end
 
     end

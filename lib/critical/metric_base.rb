@@ -321,7 +321,7 @@ module Critical
     # Initiates collection and processing of the metric, with reports
     # and trending data (if any) being sent to +reporting_handler+ and
     # +trending_handler+ respectively. Not usually called by user code.
-    def collect(reporting_handler, trending_handler)
+    def collect(reporting_handler, trending_handler = nil)
       @output_handler, @trending_handler = reporting_handler, trending_handler
 
       assert_collection_block_or_command_exists!
@@ -344,6 +344,7 @@ module Critical
     # method +requests_per_second+ that you want to graph, you write:
     #   track(:requests_per_second)
     def track(what)
+      return unless trending_handler
       trending_handler.write_metric(what, send(what), self)
     end
 
