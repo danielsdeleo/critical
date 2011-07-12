@@ -1,3 +1,4 @@
+require 'critical/dsl/config_data'
 require 'critical/dsl/metric_dsl'
 require 'critical/dsl/monitor_dsl'
 require 'critical/dsl/story_monitor_dsl'
