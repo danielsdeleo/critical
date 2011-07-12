@@ -1,3 +1,5 @@
+require 'critical/config_data'
+
 module Critical
   module DSL
     module ConfigData

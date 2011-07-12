@@ -11,7 +11,7 @@ module Critical
 
     def initialize(ipc)
       @ipc = ipc
-      @graphite_handler = Trending::GraphiteHandler.new
+      @graphite_handler = Trending::GraphiteHandler.new unless Critical.config.disable_graphite
     end
 
     def run

@@ -119,6 +119,12 @@ describe Application::Configuration do
       @config.parse_opts
       Loggable::Logger.instance.level.should == ::Logger::FATAL
     end
+
+    it "specifies trending should be disabled" do
+      @config.stub!(:argv).and_return(%w{--disable-graphite})
+      @config.parse_opts
+      @config.disable_graphite.should be_true
+    end
   end
 
   describe "in the configuration file" do
@@ -140,6 +146,5 @@ describe Application::Configuration do
     it "allows the log formatter to be configured via log_format" do
       @config.log_format.should == Critical::Loggable::Formatters::Ruby
     end
-
   end
 end

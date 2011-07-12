@@ -115,6 +115,15 @@ module Critical
         @continuous || false
       end
 
+      option "Disable reporting trends to graphite/carbon server"
+      def disable_graphite=(disabled = true)
+        @disable_graphite = disabled
+      end
+
+      def disable_graphite
+        @disable_graphite.nil? ? false : @disable_graphite
+      end
+
       option "Hostname of the graphite/carbon server", :short => :g, :arg => "HOSTNAME"
       def graphite_host=(graphite_host)
         @graphite_host = graphite_host
