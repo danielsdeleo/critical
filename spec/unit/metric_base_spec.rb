@@ -184,14 +184,16 @@ describe MetricBase do
 
     describe "defining reporting methods" do
       before do
-        @metric_class.collects { 'the answer is 42'}
+        @metric_class.collects { 'the answer is 42' }
+        # The output handler needs to be set or calling result will blow up.
+        @metric.collect(@output_handler, @trending_handler)
       end
 
       it "defines a method for reporting results" do
         @metric_class.add_reporting_method(:answer) do
           /([\d]+)$/.match(result).captures.first
         end
-         @metric.answer.should == '42'
+        @metric.answer.should == '42'
       end
 
       it "coerces output into a float" do
@@ -300,6 +302,7 @@ describe MetricBase do
         @metric_class.collects("echo 'noop'")
         @output_handler.should_receive(:collection_started)
         @metric.collect(@output_handler, @trending_handler)
+        @metric.result
       end
 
       it "runs the command and returns the result" do
@@ -385,6 +388,7 @@ describe MetricBase do
       it "notifies the output handler when collection is complete" do
         @output_handler.should_receive(:collection_completed)
         @metric.collect(@output_handler, @trending_handler)
+        @metric.result
       end
       
       describe "classifying the state of the monitored property" do

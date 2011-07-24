@@ -327,9 +327,7 @@ module Critical
       assert_collection_block_or_command_exists!
       @output_handler.collected_at = Time.new
       @output_handler.metric = self
-      report.collection_started
       run_processing_block
-      report.collection_completed
     end
 
     # Returns the result of running the collection command or code
@@ -412,12 +410,14 @@ module Critical
 
     def run_collection_command_or_block
       begin
+        report.collection_started
         result =
           if collection_command?
             `#{collection_command}`
           else
             instance_eval(&collection_block)
           end
+        report.collection_completed
       rescue Exception => e
         update_status(:critical)
         report.collection_failed(e)
