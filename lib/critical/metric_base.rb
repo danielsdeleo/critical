@@ -360,7 +360,12 @@ module Critical
     def expect(status_on_failure=nil, &block)
       status_on_failure ||= :critical
       begin
-        update_status(status_on_failure) unless instance_eval(&block)
+        if instance_eval(&block)
+          report.expectation_succeeded
+        else
+          update_status(status_on_failure)
+          report.expectation_failed
+        end
       rescue Exception => e
         update_status(status_on_failure)
       end

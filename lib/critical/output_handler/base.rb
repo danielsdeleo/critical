@@ -43,10 +43,10 @@ module Critical
       def processing_failed(error, message=nil, trace=nil)
       end
 
-      def expectation_failed(error, message=nil, trace=nil)
+      def expectation_failed(error=nil, message=nil, trace=nil)
       end
 
-      def expectation_succeeded(error, message=nil, trace=nil)
+      def expectation_succeeded(error=nil, message=nil, trace=nil)
       end
 
       def collection_completed(*args)

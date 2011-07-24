@@ -250,7 +250,7 @@ describe MetricBase do
         @metric_spec.processing_block = Proc.new { 'here I come' }
         @metric.processing_block.call.should == 'here I come'
       end
-
+      
       it "passes itself into the handler block if a block with arity 1 is given" do
         @metric_class.collects { :some_data }
         @metric_spec.processing_block = Proc.new { |m| m.snitch= :yoshitoshi}
@@ -391,6 +391,22 @@ describe MetricBase do
         @metric.result
       end
       
+      describe "reporting on expectations" do
+        
+        it "notifies the output handler when an expectation fails" do
+          @output_handler.should_receive(:expectation_failed)
+          @metric_spec.processing_block = Proc.new { expect {false} }
+          @metric.collect(@output_handler, @trending_handler)
+        end
+
+        it "notifies the output handler when an expectation succeeds" do
+          @output_handler.should_receive(:expectation_succeeded)
+          @metric_spec.processing_block = Proc.new { expect {true} }
+          @metric.collect(@output_handler, @trending_handler)
+        end
+
+      end
+
       describe "classifying the state of the monitored property" do
 
         it "reports expectation failures as critical" do
@@ -398,7 +414,7 @@ describe MetricBase do
           @metric.collect(@output_handler, @trending_handler)
           @metric.metric_status.should == :critical
         end
-
+        
         it "reports expectation failures as warning when given :warning as the argument" do
           @metric_spec.processing_block = Proc.new { expect(:warning) {false} }
           @metric.collect(@output_handler, @trending_handler)
