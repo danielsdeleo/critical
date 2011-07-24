@@ -184,14 +184,16 @@ describe MetricBase do
 
     describe "defining reporting methods" do
       before do
-        @metric_class.collects { 'the answer is 42'}
+        @metric_class.collects { 'the answer is 42' }
+        # The output handler needs to be set or calling result will blow up.
+        @metric.collect(@output_handler, @trending_handler)
       end
 
       it "defines a method for reporting results" do
         @metric_class.add_reporting_method(:answer) do
           /([\d]+)$/.match(result).captures.first
         end
-         @metric.answer.should == '42'
+        @metric.answer.should == '42'
       end
 
       it "coerces output into a float" do
@@ -296,6 +298,13 @@ describe MetricBase do
 
     describe "executing the collection command" do
 
+      it "notifies the output handler that collection has started" do
+        @metric_class.collects("echo 'noop'")
+        @output_handler.should_receive(:collection_started)
+        @metric.collect(@output_handler, @trending_handler)
+        @metric.result
+      end
+
       it "runs the command and returns the result" do
         @metric_class.collects("echo 'a random string'")
         @metric.collect(@output_handler, @trending_handler)
@@ -354,7 +363,6 @@ describe MetricBase do
           lambda { @metric.collect(@output_handler) }.should_not raise_exception
         end
       end
-
     end
 
     describe "reporting the results of collection" do
@@ -375,6 +383,28 @@ describe MetricBase do
         @metric_spec.processing_block = Proc.new { report_during_collection = report }
         @metric.collect(@output_handler, @trending_handler)
         report_during_collection.collected_at.should == now
+      end
+
+      it "notifies the output handler when collection is complete" do
+        @output_handler.should_receive(:collection_completed)
+        @metric.collect(@output_handler, @trending_handler)
+        @metric.result
+      end
+
+      describe "reporting on expectations" do
+
+        it "notifies the output handler when an expectation fails" do
+          @output_handler.should_receive(:expectation_failed)
+          @metric_spec.processing_block = Proc.new { expect {false} }
+          @metric.collect(@output_handler, @trending_handler)
+        end
+
+        it "notifies the output handler when an expectation succeeds" do
+          @output_handler.should_receive(:expectation_succeeded)
+          @metric_spec.processing_block = Proc.new { expect {true} }
+          @metric.collect(@output_handler, @trending_handler)
+        end
+
       end
 
       describe "classifying the state of the monitored property" do
