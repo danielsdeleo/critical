@@ -376,7 +376,12 @@ describe MetricBase do
         @metric.collect(@output_handler, @trending_handler)
         report_during_collection.collected_at.should == now
       end
-
+      
+      it "notifies the output handler when collection is complete" do
+        @output_handler.should_receive(:collection_completed)
+        @metric.collect(@output_handler, @trending_handler)
+      end
+      
       describe "classifying the state of the monitored property" do
 
         it "reports expectation failures as critical" do

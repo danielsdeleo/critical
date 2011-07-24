@@ -328,6 +328,7 @@ module Critical
       @output_handler.collected_at = Time.new
       @output_handler.metric = self
       run_processing_block
+      @output_handler.collection_completed
     end
 
     # Returns the result of running the collection command or code
