@@ -250,7 +250,7 @@ describe MetricBase do
         @metric_spec.processing_block = Proc.new { 'here I come' }
         @metric.processing_block.call.should == 'here I come'
       end
-      
+
       it "passes itself into the handler block if a block with arity 1 is given" do
         @metric_class.collects { :some_data }
         @metric_spec.processing_block = Proc.new { |m| m.snitch= :yoshitoshi}
@@ -297,7 +297,7 @@ describe MetricBase do
     end
 
     describe "executing the collection command" do
-      
+
       it "notifies the output handler that collection has started" do
         @metric_class.collects("echo 'noop'")
         @output_handler.should_receive(:collection_started)
@@ -384,15 +384,15 @@ describe MetricBase do
         @metric.collect(@output_handler, @trending_handler)
         report_during_collection.collected_at.should == now
       end
-      
+
       it "notifies the output handler when collection is complete" do
         @output_handler.should_receive(:collection_completed)
         @metric.collect(@output_handler, @trending_handler)
         @metric.result
       end
-      
+
       describe "reporting on expectations" do
-        
+
         it "notifies the output handler when an expectation fails" do
           @output_handler.should_receive(:expectation_failed)
           @metric_spec.processing_block = Proc.new { expect {false} }
@@ -414,7 +414,7 @@ describe MetricBase do
           @metric.collect(@output_handler, @trending_handler)
           @metric.metric_status.should == :critical
         end
-        
+
         it "reports expectation failures as warning when given :warning as the argument" do
           @metric_spec.processing_block = Proc.new { expect(:warning) {false} }
           @metric.collect(@output_handler, @trending_handler)
