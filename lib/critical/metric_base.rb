@@ -327,9 +327,9 @@ module Critical
       assert_collection_block_or_command_exists!
       @output_handler.collected_at = Time.new
       @output_handler.metric = self
-      @output_handler.collection_started
+      report.collection_started
       run_processing_block
-      @output_handler.collection_completed
+      report.collection_completed
     end
 
     # Returns the result of running the collection command or code
