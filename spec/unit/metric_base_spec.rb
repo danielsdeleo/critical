@@ -295,6 +295,12 @@ describe MetricBase do
     end
 
     describe "executing the collection command" do
+      
+      it "notifies the output handler that collection has started" do
+        @metric_class.collects("echo 'noop'")
+        @output_handler.should_receive(:collection_started)
+        @metric.collect(@output_handler, @trending_handler)
+      end
 
       it "runs the command and returns the result" do
         @metric_class.collects("echo 'a random string'")
@@ -354,7 +360,6 @@ describe MetricBase do
           lambda { @metric.collect(@output_handler) }.should_not raise_exception
         end
       end
-
     end
 
     describe "reporting the results of collection" do
